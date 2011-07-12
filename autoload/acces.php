@@ -235,7 +235,10 @@ static function entrees() {
 	F3::call('outils::verif_operateur');
 	$festival_id = F3::get('SESSION.festival_id');
 
-
+	$sql_acces_remis = DB::sql("SELECT COUNT(*) AS nb_acces_remis FROM historique_organismes WHERE `present` = 1 AND `festival_id` = $festival_id;");
+	
+	F3::set('nb_acces_remis', $sql_acces_remis[0]["nb_acces_remis"]);
+	
 	$codebarres = F3::get('REQUEST.codebarres');//TODO vérif du checksum
 	$present = F3::get('REQUEST.present');
 	$individu_id = F3::get('REQUEST.individu_id');
@@ -260,7 +263,6 @@ static function entrees() {
 
 	F3::set('acces',1);
 	F3::call('profils::afficher');
-
 }
 
 

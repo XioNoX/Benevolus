@@ -205,12 +205,12 @@ class Profils {
 			F3::set('ville',$ville->cp . ' ' . $ville->nom);
 
 			F3::set('REQUEST.date_naissance',outils::date_sql_fr(F3::get('REQUEST.date_naissance')));
+			
 			//Acces & tickets
-
 			F3::set('autorisation',acces::autorisation_individu($individu_id));
 			F3::set('tickets',acces::tickets_individu($individu_id));
 			F3::set('present',acces::present($individu_id,$festival_id));
-			//F3::allow('date|strtotime|strftime');
+
 			// Affectations :
 			DB::sql("SELECT affectations.id, festivals_jours.jour, vacations.heure_debut, vacations.heure_fin, lieux.libelle FROM `lieux`, `affectations`, `vacations`, `festivals_jours` WHERE vacations.lieu_id = lieux.id AND affectations.vacation_id = vacations.id AND festivals_jours.id = vacations.festival_jour_id AND festivals_jours.festival_id = $festival_id AND affectations.individu_id = $individu_id ORDER BY festivals_jours.jour;");
 			if (count(F3::get('DB')->result) > 0)
@@ -225,7 +225,7 @@ class Profils {
 			F3::call('outils::generer');
 		}
 		else
-		F3::http404();
+		F3::reroute("/acces/entrees");
 	}
 
 	static function lister() {

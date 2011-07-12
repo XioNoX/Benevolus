@@ -1,5 +1,16 @@
 <h3>{{@pagetitle}}</h3>
 
+<F3:check if="{{@acces}}">
+	<F3:true>
+		Nombre d'accès déjà remis : {{@nb_acces_remis}}
+		<form name="acces_entrees" method="post" action="{{@PARAMS.0}}"><label
+			for="codebarres">Code barre :</label> <input type="text"
+			name="codebarres" id="codebarres" value=""
+			required autofocus maxlength="13" /> <input type="submit" name="submit"
+			value="Valider" /></form>
+	</F3:true>
+</F3:check>
+
 <F3:check if="{{@message}}">
 	<F3:true>
 		<p class="fail">{{@message}}</p>
@@ -8,16 +19,6 @@
 <F3:check if="{{@succes}}">
 	<F3:true>
 		<p class="pass">{{@succes}}</p>
-	</F3:true>
-</F3:check>
-
-<F3:check if="{{@acces}}">
-	<F3:true>
-		<form name="acces_entrees" method="post" action="{{@PARAMS.0}}"><label
-			for="codebarres">Code barre :</label> <input type="text"
-			name="codebarres" id="codebarres" value="{{@REQUEST.codebarres}}"
-			required autofocus /> <input type="submit" name="submit"
-			value="Valider" /></form>
 	</F3:true>
 </F3:check>
 
@@ -69,7 +70,17 @@ Organisme : {{@organisme}} <br />
 	<F3:true>
 		<form name="acces_entrees" method="post" action="{{@PARAMS.0}}"><input
 			type="hidden" name="individu_id" id="individu_id"
-			value="{{@REQUEST.id}}" required /> <input type="submit"
-			name="present" value="Accès remis" /></form>
+			value="{{@REQUEST.id}}" required />
+			
+			<F3:check if="{{@present == 'non'}}">
+				<F3:true>
+					<input type="submit" name="present" value="Accès remis" />
+				</F3:true>
+				<F3:false>
+					<input type="submit" name="present" value="Accès remis" disabled="disabled" />
+				</F3:false>
+			</F3:check>
+			
+		</form>
 	</F3:true>
 </F3:check>
