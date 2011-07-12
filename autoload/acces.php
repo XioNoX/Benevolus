@@ -11,12 +11,13 @@ class Acces {
 		F3::set('jquery_url_edit','/acces/editer/');
 		F3::set('jquery_url_edit2','/acces/editer');
 		F3::set('jquery_largeur','100%');
-		F3::set('jquery_col_names',"['id','Libelle','Individu']");
+		F3::set('jquery_col_names',"['id','Libelle','Nom','Prenom']");
 
 		F3::set('jquery_col_model',"[
 	      {name:'id', index:'id', width:55, formatter: formateadorLink}, 
 	      {name:'libelle', index:'libelle', width:100},
-	      {name:'individu', index:'individu', width:100}
+	      {name:'nom', index:'nom', width:100},
+	      {name:'prenom', index:'prenom', width:100}
 	    ]");
 		F3::set('template','liste_generique2');
 		F3::call('outils::generer');
@@ -31,6 +32,8 @@ class Acces {
 		if(!is_numeric($page)) $page = 0;
 		$limit = F3::get('REQUEST.rows');
 		if(!is_numeric($limit)) $limit = 0;
+		$totalrows = isset($_REQUEST['totalrows']) ? $_REQUEST['totalrows']: false;
+		if(is_numeric($totalrows)) { $limit = $totalrows; }
 		$sidx = mysql_escape_string(F3::get('REQUEST.sidx'));
 		$sord = mysql_escape_string(F3::get('REQUEST.sord'));
 		if(!$sidx) $sidx =1;
@@ -69,7 +72,7 @@ class Acces {
 		if ($page > $total_pages) $page=$total_pages;
 		$start = $limit*$page - $limit; // do not put $limit*($page - 1)
 		if ($start<0) $start = 0;
-		DB::sql("SELECT acces.id, acces_types.libelle,  CONCAT(individus.prenom, ' ', individus.nom) as individu FROM acces,acces_types, individus WHERE individus.id = acces.individu_id AND  acces.acces_type_id=acces_types.id AND acces_types.festival_id = $festival_id ".$wh." ORDER BY $sidx $sord LIMIT $start, $limit;");
+		DB::sql("SELECT acces.id, acces_types.libelle, individus.nom, individus.prenom FROM acces,acces_types, individus WHERE individus.id = acces.individu_id AND  acces.acces_type_id=acces_types.id AND acces_types.festival_id = $festival_id ".$wh." ORDER BY $sidx $sord LIMIT $start, $limit;");
 		
 		$reponse = new stdClass();
 		$reponse->page = $page;
@@ -78,7 +81,7 @@ class Acces {
 		$i=0;
 		foreach (F3::get('DB')->result as $row) {
 			$reponse->rows[$i]['id']=$row['id'];
-			$reponse->rows[$i]['cell']=array($row['id'],$row['libelle'],$row['individu']);
+			$reponse->rows[$i]['cell']=array($row['id'],$row['libelle'],$row['nom'],$row['prenom']);
 			$i++;
 		}
 		echo json_encode($reponse);
@@ -314,8 +317,12 @@ static function tickets_individu($individu_id) {
 		}
 		return $retour;
 	}
-	DB::sql("SELECT count(id) as count FROM `historique_organismes` WHERE `historique_organismes`.responsable = 1 AND `historique_organismes`.individu_id = $individu_id AND `historique_organismes`.festival_id = $festival_id;");
-	if(F3::get('DB')->result[0]['count'] > 0)
+	//DB::sql("SELECT count(id) as count FROM `historique_organismes` WHERE `historique_organismes`.responsable = 1 AND `historique_organismes`.individu_id = $individu_id AND `historique_organismes`.festival_id = $festival_id;");
+	//if(F3::get('DB')->result[0]['count'] > 0)
+	DB::sql("SELECT `acces_types`.libelle FROM `acces_types`, `acces` WHERE `acces`.individu_id = $individu_id AND `acces`.acces_type_id = `acces_types`.id;");
+	//print_r(F3::get('DB')->result[0]['libelle']);
+	if(count(F3::get('DB')->result)>0)
+	if(F3::get('DB')->result[0]['libelle'] == "Badge")
 	return 0;
 
 	DB::sql("SELECT count(`affectations`.id) as count FROM `affectations`, `vacations`, `festivals_jours` WHERE vacations.festival_jour_id = `festivals_jours`.id AND `affectations`.vacation_id = vacations.id AND `affectations`.individu_id = $individu_id AND `festivals_jours`.festival_id = $festival_id;");
