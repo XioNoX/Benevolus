@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr" class="no-js">
+<head>
+	<meta charset="UTF-8">
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	
+	<title>{{@site}}</title>
+
+	<link rel="stylesheet" type="text/css" href="/gui/css/theme.css?v=2"/>
+
+<F3:check if="{{@SESSION.acces_web >= @acces_operateur}}">
+	<F3:true>
+		<script type='text/javascript' src='/gui/js/admin.js'></script>
+   </F3:true>
+</F3:check> 
+
+
+  <F3:check if="{{@jquery == 1}}">
+    <F3:true>
+
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+	    <script>!window.jQuery && document.write(unescape('%3Cscript src="/gui/js/libs/jquery-1.5.2.min.js"%3E%3C/script%3E'))</script>
+      <link rel="stylesheet" type="text/css" href="/gui/css/jquery-ui-1.8.9.custom.css"/>
+	    <script type='text/javascript' src='/gui/js/libs/jquery-ui-1.8.9.custom.min.js'></script>
+	    <script type='text/javascript' src='/gui/js/libs/jquery.autoSuggest.js'></script>
+      <!--	<script type='text/javascript' src='/gui/js/menu.js'></script>-->
+	    <script type='text/javascript' src='/gui/js/libs/jquery.calendrical.js'></script>
+	    <script type='text/javascript' src='/gui/js/libs/jquery.ui.timepicker.js'></script>
+	    <script type='text/javascript' src='/gui/js/libs/jquery.fileupload.js'></script>
+	    <script type='text/javascript' src='/gui/js/libs/jquery.fileupload-ui.js'></script>
+		  <!-- required for elastic input fields -->
+	    <script type='text/javascript' src='/gui/js/libs/jquery.elastic.js'></script>
+
+      <F3:check if="{{@jqgrid == 1}}">
+      <F3:true>
+        	<link rel="stylesheet" type="text/css" href="/gui/css/ui.jqgrid.css"/>
+          
+	        <script type='text/javascript' src='/gui/js/libs/grid.locale-fr.js'></script>
+	        <script type='text/javascript' src='/gui/js/libs/jquery.jqGrid.min.js'></script>
+      </F3:true>
+      </F3:check>    
+
+      <F3:check if="{{@textboxlist == 1}}">
+      <F3:true>
+	      <!-- required stylesheet for TextboxList -->
+	      <link rel="stylesheet" href="/gui/css/TextboxList.css" type="text/css" media="screen" charset="utf-8" />
+	      <link rel="stylesheet" href="/gui/css/TextboxList.Autocomplete.css" type="text/css" media="screen" charset="utf-8" />
+
+        <!-- required for TextboxList -->
+	      <script src="/gui/js/libs/GrowingInput.js" type="text/javascript" charset="utf-8"></script>
+	      <script src="/gui/js/libs/TextboxList.js" type="text/javascript" charset="utf-8"></script>		
+	      <script src="/gui/js/libs/TextboxList.Autocomplete.js" type="text/javascript" charset="utf-8"></script>
+      </F3:true>
+      </F3:check>
+      
+       <F3:check if="{{@facybox == 1}}">
+      <F3:true>
+	      <!-- required stylesheet for TextboxList -->
+	      <link rel="stylesheet" href="/gui/css/facybox.css" type="text/css" media="screen" charset="utf-8" />
+
+        <!-- required for TextboxList -->
+	      <script src="/gui/js/libs/facybox.js" type="text/javascript" charset="utf-8"></script>
+      </F3:true>
+      </F3:check>        
+
+
+    </F3:true>
+  </F3:check>
+
+	<meta name="description" content="Plateforme de gestion de bénévoles">
+	<meta name="author" content="Julien et Arzhel">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+  
+<body>
+	<header>
+		<h2>{{@site}}</h2>
+<!-- 		{{@site}} -->
+		
+		<div id="menu">
+					
+			    <ul id="topnav">
+			    
+			    	<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@menu}}">
+			    		<li>
+			    			<a href="{{@item.lien}}" title="{{@item.titre}}">{{@item.titre}}</a>
+<!-- 				    		Affichage du sous-menu -->
+				    		<F3:check if="{{isset(@item.sous_menu)}}">
+				    		<F3:true>
+					    		<span>
+					    			<F3:repeat key="{{@key2}}" value="{{@item2}}" group="{{@item.sous_menu}}">
+					    				<a href="{{@item2.lien}}">{{@item2.titre}}</a> |
+									</F3:repeat>
+								</span>
+							</F3:true>
+				    		</F3:check>
+				    	</li>
+			    	</F3:repeat>
+			    	
+			    	
+			    		<F3:check if="{{@SESSION.acces_web >= @acces_operateur}}">
+						<F3:true>							
+							<div id="festival_id">
+							<form method="POST" action="">
+					    		Festival
+					    		<select name="festival_id" onchange="changement_festival(this.value)">
+					    		<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@festivals}}">
+					    			<F3:check if="{{@SESSION.festival_id == @item.id}}">
+										<F3:true>
+											<option value="{{@item.id}}" selected>{{@item.annee}}</option>
+										</F3:true>
+										<F3:false>
+											<option value="{{@item.id}}">{{@item.annee}}</option>	
+										</F3:false>
+									</F3:check>
+					    			
+					    		</F3:repeat>
+					    		</select>
+					    	</form>
+					    	</div>
+						</F3:true>
+					</F3:check>
+			
+			    </ul>
+			
+			</div>
+				
+	</header>
+	<div id="main">
+		<F3:include href="{{@ERROR?'error':@template}}.htm"/>
+	</div>
+	<footer>
+<!--		<hr/>-->
+	<p id=credits>Pour toutes informations, veuillez contacter le service bénévole à <a href=mailto:benevoles@vieillescharrues.asso.fr>benevoles@vieillescharrues.asso.fr</a></p>
+	</footer>
+</body>
+</html>

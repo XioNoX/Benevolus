@@ -1,0 +1,13 @@
+<h3>{{@pagetitle}} - {{@REQUEST.sujet}}</h3>
+
+<F3:check if="{{@REQUEST}}">
+	<F3:true>
+		Message reçu de : {{@expediteur}} <br/>
+
+		Message : <br/> {{@REQUEST.message}} <br/>
+		
+		<a href="/messages/non_lu/{{@REQUEST.id}}">Marquer comme non lu</a> <br/>
+		<a href="/messages/supprimer/{{@REQUEST.id}}">Supprimer</a> <br/>
+	</F3:true>
+	<F3:false><p>Aucun message à afficher</p></F3:false>
+</F3:check>

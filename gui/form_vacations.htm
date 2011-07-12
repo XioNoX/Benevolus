@@ -1,0 +1,251 @@
+
+<style>
+.ui-autocomplete-loading {
+	background: white url('../../gui/images/gfx/ui-anim_basic_16x16.gif')
+		right center no-repeat;
+}
+
+.ui-autocomplete {
+	max-height: 100px;
+	overflow-y: auto;
+}
+</style>
+
+<h3>{{@pagetitle}}</h3>
+<form name="organisme" method="post" action="{{@PARAMS.0}}"
+	autocomplete="off"><F3:check if="{{@message}}">
+	<F3:true>
+		<p class="fail">{{@message}}</p>
+	</F3:true>
+</F3:check>
+<dl>
+	<dt><label for="libelle">Libelle</label></dt>
+	<dd><input type="text" name="libelle" id="libelle"
+		value="{{@REQUEST.libelle}}" required /></dd>
+
+
+	<dt>Lieu</dt>
+	<dd><F3:check if="{{@lieux}}">
+		<F3:true>
+			<select name="lieu_id" id="select_lieu">
+				<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@lieux}}">
+
+					<F3:check if="{{@REQUEST.lieu_id == @item.id}}">
+						<F3:true>
+							<option value="{{@item.id}}" selected>{{@item.libelle}}</option>
+						</F3:true>
+						<F3:false>
+							<option value="{{@item.id}}">{{@item.libelle}}</option>
+						</F3:false>
+					</F3:check>
+
+				</F3:repeat>
+			</select>
+	</F3:check></dd>
+	<dt>Jour</dt>
+	<dd><F3:check if="{{@festivals_jours}}">
+		<F3:true>
+			<select name="festival_jour_id">
+				<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@festivals_jours}}">
+
+					<F3:check if="{{@REQUEST.festival_jour_id == @item.id}}">
+						<F3:true>
+							<option value="{{@item.id}}" selected>{{date('d/m/Y',strtotime(@item.jour))}}</option>
+						</F3:true>
+						<F3:false>
+							<option value="{{@item.id}}">{{date('d/m/Y',strtotime(@item.jour))}}</option>
+						</F3:false>
+					</F3:check>
+
+				</F3:repeat>
+			</select>
+	</F3:check></dd>
+
+
+	<F3:check if="{{@REQUEST.nombre_minimum}}">
+		<F3:true>
+			<dt><label for="nombre_minimum">Effectif minimum</label></dt>
+			<dd><input type="text" name="nombre_minimum" id="nombre_minimum"
+				value="{{@REQUEST.nombre_minimum}}" required /></dd>
+
+		</F3:true>
+		<F3:false>
+			<dt><label for="nombre_minimum">Effectif minimum</label></dt>
+			<dd><input type="text" name="nombre_minimum" id="nombre_minimum"
+				value="0" required /></dd>
+		</F3:false>
+	</F3:check>
+
+
+
+	<dt><label for="nombre_maximum">Effectif maximum</label></dt>
+	<dd><input type="text" name="nombre_maximum" id="nombre_maximum"
+		value="{{@REQUEST.nombre_maximum}}" required /></dd>
+
+
+	<F3:check if="{{@REQUEST.heure_debut}}">
+		<F3:true>
+			<dt><label for="heure_debut">Heure debut</label></dt>
+			<dd><input type="text" name="heure_debut" id="heure_debut"
+				value="{{@REQUEST.heure_debut}}" required /></dd>
+
+			<dt><label for="heure_fin">Heure fin</label></dt>
+			<dd><input type="text" name="heure_fin" id="heure_fin"
+				value="{{@REQUEST.heure_fin}}" autoconlpete="off" required /></dd>
+
+		</F3:true>
+		<F3:false>
+			<dt><label for="heure_debut">Heure debut</label></dt>
+			<dd><input type="text" name="heure_debut" id="heure_debut"
+				value="00h00" required /></dd>
+
+			<dt><label for="heure_fin">Heure fin</label></dt>
+			<dd><input type="text" name="heure_fin" id="heure_fin"
+				value="00h00" autoconlpete="off" required /></dd>
+
+		</F3:false>
+	</F3:check>
+	<dt><label for="responsable">Responsable</label></dt>
+	<dd><input type="text" name="responsable" id="responsable"
+		value="{{@REQUEST.responsable}}" onkeypress=handleEnter(this,
+		event);
+required /></dd>
+	<dd><input type="hidden" name="responsable_id" id="responsable_id"
+		value="{{@REQUEST.responsable_id}}" /></dd>
+	<p />
+	<dd><input type="submit" name="submit" value="Valider" /></dd>
+</dl>
+</form>
+
+
+<fieldset><legend>Membres :</legend> 
+
+<F3:check if="{{@membres}}">
+	<F3:true>
+		<ul>
+			<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@membres}}">
+				<li><a href="/profil/{{@item.id}}">{{@item.prenom}} {{@item.nom}</a>
+				- {{@item.libelle}}
+			</F3:repeat>
+		</ul>
+		<a href="/vacations/imprimer/emargement/{{@REQUEST.id}}">Imprimer la
+		feuille d'émargement</a> - <a class="supprimerMembres" href="#">Supprimer tous les membres de la vacation</a>
+	</F3:true>
+	<F3:false>
+			Aucun membre dans cette vacation
+		</F3:false>
+</F3:check></fieldset>
+
+<div id="dialog_del" title="Supprimer ?">
+	<p>
+		<span class="ui-icon ui-icon-alert"
+			style="float: left; margin: 0 7px 20px 0;"></span>Supprimer ?
+	</p>
+</div>
+
+<script>
+
+$("#dialog_del").dialog({
+	autoOpen : false,
+	modal : true,
+	buttons : {
+		"Supprimer" : function() {
+			window.location="/vacations/affectations/supprimer/{{@REQUEST.id}}";
+		},
+		"Annuler" : function() {
+			$(this).dialog("close");
+		}
+	}
+});
+
+function IsNumeric(strString)
+//  check for valid numeric strings	
+{
+var strValidChars = "0123456789";
+var strChar;
+var blnResult = true;
+
+if (strString.length == 0) return false;
+
+//  test strString consists of valid characters listed above
+for (i = 0; i < strString.length && blnResult == true; i++)
+   {
+   strChar = strString.charAt(i);
+   if (strValidChars.indexOf(strChar) == -1)
+      {
+      blnResult = false;
+      }
+   }
+return blnResult;
+}
+
+$("#select_lieu").change(function () {
+	responsable_de_lieu();
+});
+
+
+$(".supprimerMembres").live('click', function() {
+	$("#dialog_del").dialog("open");
+	return false;
+
+});
+
+function responsable_de_lieu() {
+	var select_lieu = document.getElementById("select_lieu");
+	var id_lieu = select_lieu.options[select_lieu.selectedIndex].value;
+	
+	$.ajax({
+		   type: "POST",
+		   url: "/lieux/" + id_lieu + "/responsable",
+		   data: "id="+id_lieu,
+		   success: function(retour_ajax){
+		var retour_ajax_tab = retour_ajax.split(";");
+		
+		if (IsNumeric(retour_ajax_tab[0])){
+		document.getElementById('responsable_id').value = retour_ajax_tab[0];
+		document.getElementById('responsable').value = retour_ajax_tab[1];
+		}
+		   }
+		 });
+}
+
+
+	function handleEnter(inField, e) {
+		var charCode;
+
+		if (e && e.which) {
+			charCode = e.which;
+		} else if (window.event) {
+			e = window.event;
+			charCode = e.keyCode;
+		}
+
+		if (charCode != 13) {
+			onkeypress = "javascript:document.getElementById('responsable_id').value = 0;"
+		}
+	}
+
+	$(function() {
+		$("#responsable").autocomplete( {
+			source : "../../ajax/profils",
+			minLength : 3,
+			select : function(event, ui) {
+				document.getElementById('responsable_id').value = ui.item.id;
+			}
+		});
+
+	});
+
+	$(document).ready(function() {
+		$('#heure_debut').timepicker( {
+
+		})
+
+		$('#heure_fin').timepicker( {})
+	    var responsable_id = document.getElementById('responsable_id').value;
+		
+        if (responsable_id == ""){
+	    	responsable_de_lieu();
+        }
+	});
+</script>

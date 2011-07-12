@@ -1,0 +1,45 @@
+<h3>{{@pagetitle}}</h3>
+
+<F3:check if="{{@messages}}">
+	<F3:true>
+		<table>
+		
+		<F3:check if="{{@envoyes}}">
+			<F3:true>
+				<tr><td>A</td><td>Sujet</td><td>Message</td></tr>
+				<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@messages}}">
+					<tr>
+						<td><a href="/messages/{{@item.id}}">{{@item.prenom}} {{@item.nom}}</a></td>
+						<td>{{@item.sujet}}</td>
+						<td>{{@item.message}}</td>
+					</tr>
+				</F3:repeat>
+			</F3:true>
+		</F3:check>
+		
+		<F3:check if="{{@recus}}">
+			<F3:true>
+				<tr><td>De</td><td>Sujet</td></tr>
+				<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@messages}}">
+					<tr>
+						<td><a href="/profil/{{@item.individu_id}}">{{@item.prenom}} {{@item.nom}}</a></td>
+						<td>
+                <a href="/messages/{{@item.id}}">
+            		<F3:check if="{{@item.lu == 1}}">
+								<F3:true>{{@item.sujet}}</F3:true>
+								<F3:false><b>{{@item.sujet}}</b></F3:false>
+							</F3:check>
+                </a>
+            </td>
+						
+					</tr>
+				</F3:repeat>
+			</F3:true>
+		</F3:check>
+		
+		
+			
+		</table>
+	</F3:true>
+	<F3:false><p>Aucun message à afficher</p></F3:false>
+</F3:check>

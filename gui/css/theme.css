@@ -1,0 +1,617 @@
+#organisme_membres {
+    float: left;
+    width: 100%;
+}
+.organisme_gauche {
+    float: left;
+    width: 50%;
+}
+.organisme_droit {
+    float: right;
+    width: 50%;
+}
+
+/*Aspect général du site*/
+
+header h2 {margin-top:10px;margin-bottom:10px;}
+
+html {font-size:100.01%;}
+body {font:80% sans-serif;color:#333;background:#fff;margin:5px;margin-top:0px;margin:auto;width:970px;}
+
+footer {float: left; text-align: center; width: 100%;}
+
+h1,h2,h3,h4,h5,h6 {font-weight:normal;color:#111;font-family:Impact,sans-serif;}
+
+h1 {font-size:3em;line-height:1;margin-bottom:0.5em;}
+h2 {font-size:2.5em;line-height:0.875;margin-bottom:0.8755em;}
+h3 {font-size:2em;margin-bottom:0.75em;}
+h4 {font-size:1.4em;line-height:1;margin-bottom:1em;}
+h5 {font-size:1.2em;line-height:1.25;margin-bottom:1.25em;}
+h6 {font-size:1em;font-weight:bold;}
+
+h1 img,h2 img,h3 img,h4 img,h5 img,h6 img {margin:0;}
+
+small {font-size:0.75em;line-height:1;}
+
+p {margin:0 0 1.5em;line-height:1.25em;}
+p img.left {float:left;margin:0 1.5em 1.5em 0;padding:0;}
+p img.right {float:right;margin:0 0 1.5em 1.5em;}
+p.last {margin-bottom:0!important;}
+
+a {color:#09f;text-decoration:none;}
+a:hover {color:#036;text-decoration:underline;}
+a img {margin:0;}
+
+blockquote {font-style:italic;color:#666;margin:1.5em;}
+strong {font-weight:bold;}
+em,dfn {font-style:italic;}
+dfn {font-weight:bold;}
+sup,sub {line-height:0;}
+
+abbr,acronym {border-bottom:1px dotted #666;}
+address {margin:0 0 1.5em;font-style:italic;}
+del {color:#666;}
+
+pre {margin:1.5em 0;white-space:pre;}
+pre,code,tt {font:1em monospace;line-height:1.5;}
+
+ol {list-style-type:decimal;}
+
+dl dt {font-size:11px;text-transform:uppercase;}
+
+dl {margin:0 0 1.5em 0;}
+dd {margin-left:1.5em;}
+
+table {margin-bottom:1.4em;width:100%;}
+th {font-weight:bold;}
+thead th {background:#c3d9ff;}
+th,td,caption {padding:3px 5px;}
+th.right,td.right {text-align:right;}
+tr.even td {background:#e5ecf9;}
+tfoot {font-style:italic;}
+caption {background:#eee;}
+
+input,textarea,select {font:90% sans-serif;padding:1px;margin-bottom:0.5em;}
+
+#main h3 {color:#f60;}
+
+p#credits { color: gray; font-size:10px; padding-top:2.5em;} 
+
+.pass,.info,.warn,.fail {font-size:11px;color:#333;padding:0.25em 0.5em;}
+.pass {background:#cfc;border:1px solid #beb;}
+.info {background:#ccf;border:1px solid #bbe;}
+.warn {background:#ff9;border:1px solid #ee8;}
+.fail {background:#fcc;border:1px solid #ebb;}
+
+.center {text-align:center;}
+.middle {vertical-align:middle;}
+.spacer {height:0;margin:1em 0;}
+.lowercase {text-transform:lowercase;}
+
+.odd,.even {padding:10px;}
+.odd {background:#eee;}
+
+#form_individu input, textarea{ width:95%}
+/* PROFIL */
+
+#profil_gauche {
+    float: left;
+    width: 169px;
+}
+#profil_droit {
+    display: inline;
+    float: right;
+    width: 777px;
+}
+
+.profil_bloc {
+	float: left;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.profil_admin_1 {
+    float: left;
+}
+.profil_admin_2 {
+    float: left;
+    margin-left: 20px;
+}
+.profil_coordonnees_1 {
+    float: left;
+    width: 48%;
+}
+.profil_coordonnees_2 {
+    float: right;
+    width: 48%;
+}
+.profil_infos_perso {
+    float: left;
+    width: 50%;
+}
+.profil_identification {
+    float: right;
+    width: 50%;
+}
+
+/* FIN PROFIL */
+/* AFFECTATIONS */
+#gbox_liste_vacations { float: right;}
+#gbox_liste_personnes { float: left;}
+#gbox_liste_organismes { float: left;}
+/* FIN AFFECTATIONS */
+
+/* MENU */
+#menu { height: 0px; font: 10px normal Verdana,Arial,Helvetica,sans-serif;}
+ul#topnav {
+	margin: 0; padding: 0;
+	float: left;
+	width: 970px;
+	list-style: none;
+	position: relative;
+	font-size: 1.2em;
+	background: url(/gui/css/topnav_stretch.gif) repeat-x;
+}
+ul#topnav li {
+	float: left;
+	margin: 0; padding: 0;
+	border-right: 1px solid #555;
+}
+ul#topnav li a {
+	padding: 10px 15px;
+	display: block;
+	color: #f0f0f0;
+	text-decoration: none;
+}
+ul#topnav li:hover { background: #1376c9 url(/gui/css/topnav_active.gif) repeat-x; }
+ul#topnav li span {
+	float: left;
+	padding: 5px 0;
+	position: absolute;
+	left: 0; top:34px;
+	display: none;
+	width: 970px;
+	background: #a276c9;
+	color: #fff;
+	-moz-border-radius-bottomright: 5px;
+	-khtml-border-radius-bottomright: 5px;
+	-webkit-border-bottom-right-radius: 5px;
+	-moz-border-radius-bottomleft: 5px;
+	-khtml-border-radius-bottomleft: 5px;
+	-webkit-border-bottom-left-radius: 5px;
+}
+ul#topnav li:hover span { display: block; }
+ul#topnav li span a { display: inline; }
+ul#topnav li span a:hover {text-decoration: underline;}
+/* Fin Menu */
+
+/*  autocomplete */
+.ui-autocomplete-loading {
+	background: white url('/gui/images/gfx/ui-anim_basic_16x16.gif')
+		right center no-repeat;
+}
+
+.ui-autocomplete {
+	max-height: 100px;
+	overflow-y: auto;
+}
+
+
+/* AutoSuggest Version 1.2 */
+ul.as-selections {
+	list-style-type: none;
+	border-top: 1px solid #888;
+	border-bottom: 1px solid #b6b6b6;
+	border-left: 1px solid #aaa;
+	border-right: 1px solid #aaa;
+	padding: 4px 0 4px 4px;
+	margin: 0;
+	overflow: auto;
+	background-color: #fff;
+	box-shadow:inset 0 1px 2px #888;
+	-webkit-box-shadow:inset 0 1px 2px #888;
+	-moz-box-shadow:inset 0 1px 2px #888;
+}
+
+ul.as-selections.loading {
+	background-color: #eee;
+}
+
+ul.as-selections li {
+	float: left;
+	margin: 1px 4px 1px 0;
+}
+
+ul.as-selections li.as-selection-item {
+	color: #2b3840;
+	font-size: 13px;
+	font-family: "Lucida Grande", arial, sans-serif;
+	text-shadow: 0 1px 1px #fff;
+	background-color: #ddeefe;
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ddeefe), to(#bfe0f1));
+	border: 1px solid #acc3ec;
+	border-top-color: #c0d9e9;
+	padding: 2px 7px 2px 10px;
+	border-radius: 12px;
+	-webkit-border-radius: 12px;
+	-moz-border-radius: 12px;
+	box-shadow: 0 1px 1px #e4edf2;
+	-webkit-box-shadow: 0 1px 1px #e4edf2;
+	-moz-box-shadow: 0 1px 1px #e4edf2;
+}
+
+ul.as-selections li.as-selection-item:last-child {
+	margin-left: 30px;
+}
+
+ul.as-selections li.as-selection-item a.as-close {
+	float: right;
+	margin: 1px 0 0 7px;
+	padding: 0 2px;
+	cursor: pointer;
+	color: #5491be;
+	font-family: "Helvetica", helvetica, arial, sans-serif;
+	font-size: 14px;
+	font-weight: bold;
+	text-shadow: 0 1px 1px #fff;
+	-webkit-transition: color .1s ease-in;
+}
+
+ul.as-selections li.as-selection-item.blur {
+	color: #666666;
+	background-color: #f4f4f4;
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f4f4f4), to(#d5d5d5));
+	border-color: #bbb;
+	border-top-color: #ccc;
+	box-shadow: 0 1px 1px #e9e9e9;
+	-webkit-box-shadow: 0 1px 1px #e9e9e9;
+	-moz-box-shadow: 0 1px 1px #e9e9e9;
+}
+
+ul.as-selections li.as-selection-item.blur a.as-close {
+	color: #999;
+}
+
+ul.as-selections li:hover.as-selection-item {
+	color: #2b3840;
+	background-color: #bbd4f1;
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#bbd4f1), to(#a3c2e5));
+	border-color: #6da0e0;
+	border-top-color: #8bb7ed;
+}
+
+ul.as-selections li:hover.as-selection-item a.as-close {
+	color: #4d70b0;
+}
+
+ul.as-selections li.as-selection-item.selected {
+	border-color: #1f30e4;
+}
+
+ul.as-selections li.as-selection-item a:hover.as-close {
+	color: #1b3c65;
+}
+
+ul.as-selections li.as-selection-item a:active.as-close {
+	color: #4d70b0;
+}
+
+ul.as-selections li.as-original {
+	margin-left: 0;
+}
+
+ul.as-selections li.as-original input {
+	border: none;
+	outline: none;
+	font-size: 13px;
+	width: 120px;
+	height: 18px;
+	padding-top: 3px;
+}
+
+ul.as-list {
+	position: absolute;
+	list-style-type: none;
+	margin: 2px 0 0 0;
+	padding: 0;
+	font-size: 14px;
+	color: #000;
+	font-family: "Lucida Grande", arial, sans-serif;
+	background-color: #fff;
+	background-color: rgba(255,255,255,0.95);
+	z-index: 2;
+	box-shadow: 0 2px 12px #222;
+	-webkit-box-shadow: 0 2px 12px #222;
+	-moz-box-shadow: 0 2px 12px #222;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+}
+
+li.as-result-item, li.as-message {
+	margin: 0 0 0 0;
+	padding: 5px 12px;
+	background-color: transparent;
+	border: 1px solid #fff;
+	border-bottom: 1px solid #ddd;
+	cursor: pointer;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+}
+
+li:first-child.as-result-item {
+	margin: 0;
+}
+
+li.as-message {
+	margin: 0;
+	cursor: default;
+}
+
+li.as-result-item.active {
+	background-color: #3668d9;
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 64%, from(rgb(110, 129, 245)), to(rgb(62, 82, 242)));
+	border-color: #3342e8;
+	color: #fff;
+	text-shadow: 0 1px 2px #122042;
+}
+
+li.as-result-item em { 
+	font-style: normal; 
+	background: #444;  
+	padding: 0 2px;
+	color: #fff;
+}
+
+li.as-result-item.active em { 
+	background: #253f7a;  
+	color: #fff;
+}
+
+/* Selection festival_id */
+#festival_id { float:right; padding:8px; color:#ffffff;}
+
+/* Webkit Hacks  */
+@media screen and (-webkit-min-device-pixel-ratio:0) {	
+	ul.as-selections {
+		border-top-width: 2px;
+	}
+	ul.as-selections li.as-selection-item {
+		padding-top: 3px;
+		padding-bottom: 3px;
+	}
+	ul.as-selections li.as-selection-item a.as-close {
+		margin-top: -1px;
+	}
+	ul.as-selections li.as-original input {
+		height: 19px;
+	}
+}
+
+/* Opera Hacks  */
+@media all and (-webkit-min-device-pixel-ratio:10000), not all and (-webkit-min-device-pixel-ratio:0) {
+	ul.as-list {
+		border: 1px solid #888;
+	}
+	ul.as-selections li.as-selection-item a.as-close {
+		margin-left: 4px;
+		margin-top: 0;
+	}
+}
+
+/* IE Hacks  */
+ul.as-list {
+	border: 1px solid #888\9;
+}
+ul.as-selections li.as-selection-item a.as-close {
+	margin-left: 4px\9;
+	margin-top: 0\9;
+}
+
+/* Firefox 3.0 Hacks */
+ul.as-list,  x:-moz-any-link, x:default { 
+	border: 1px solid #888;
+}
+BODY:first-of-type ul.as-list, x:-moz-any-link, x:default { /* Target FF 3.5+ */
+	border: none;
+}
+/* Fin AutoSuggest	 */
+
+/*
+ * Timepicker stylesheet
+ * Highly inspired from datepicker
+ * FG - Nov 2010 - Web3R
+ *
+ * version 0.0.3 : Fixed some settings, more dynamic
+ * version 0.0.4 : Removed width:100% on tables
+ */
+
+.ui-timepicker-inline { display: inline; }
+
+#ui-timepicker-div { padding: 0.2em }
+.ui-timepicker-table { display: inline-table }
+.ui-timepicker-table table { margin:0.15em 0 0 0; border-collapse: collapse; }
+
+.ui-timepicker-hours, .ui-timepicker-minutes { padding: 0.2em;  }
+
+.ui-timepicker-table .ui-timepicker-title { line-height: 1.8em; text-align: center; }
+.ui-timepicker-table td { padding: 0.1em; width: 2.2em; }
+.ui-timepicker-table th.periods { padding: 0.1em; width: 2.2em; }
+
+/* span for disabled cells */
+.ui-timepicker-table td span {
+	display:block;
+    padding:0.2em 0.3em 0.2em 0.5em;
+    width: 1.2em;
+
+    text-align:right;
+    text-decoration:none;
+}
+/* anchors for clickable cells */
+.ui-timepicker-table td a {
+    display:block;
+    padding:0.2em 0.3em 0.2em 0.5em;
+    width: 1.2em;
+
+    text-align:right;
+    text-decoration:none;
+}
+/* Fin TimePicker */
+
+/* Calendrier */
+.calendricalDatePopup {
+  background: white;
+  border: solid 1px #999999;
+  padding: 2px;
+  text-align: center;
+  width: 160px; }
+  .calendricalDatePopup table {
+    border-collapse: collapse;
+    width: 160px; }
+    .calendricalDatePopup table .monthCell {
+      padding: 2px 0; }
+      .calendricalDatePopup table .monthCell a {
+        display: block;
+        float: left;
+        line-height: 20px; }
+      .calendricalDatePopup table .monthCell .prevMonth, .calendricalDatePopup table .monthCell .nextMoth {
+        width: 24px; }
+      .calendricalDatePopup table .monthCell .monthName {
+        width: 110px; }
+    .calendricalDatePopup table a {
+      text-decoration: none; }
+    .calendricalDatePopup table td {
+      text-align: center;
+      font-size: 12px;
+      padding: 0; }
+      .calendricalDatePopup table td a {
+        display: block;
+        color: black;
+        padding: 2px 3px; }
+        .calendricalDatePopup table td a:hover {
+          background: #ccccff;
+          border: none;
+          padding: 2px 3px; }
+      .calendricalDatePopup table td.today a {
+        background: #eeeebb; }
+      .calendricalDatePopup table td.selected a {
+        background: #ccccff; }
+      .calendricalDatePopup table td.today_selected a {
+        background: #eeeebb;
+        border: solid 1px #dddd66;
+        padding: 1px 2px; }
+      .calendricalDatePopup table td.nonMonth a {
+        color: #999999; }
+
+.calendricalTimePopup {
+  background: white;
+  border: solid 1px #999999;
+  width: 110px;
+  height: 130px;
+  overflow: auto; }
+  .calendricalTimePopup ul {
+    margin: 0;
+    padding: 0; }
+    .calendricalTimePopup ul li {
+      list-style: none;
+      margin: 0; }
+      .calendricalTimePopup ul li a, .calendricalTimePopup ul li a:visited {
+        text-indent: 10px;
+        padding: 4px;
+        display: block;
+        color: black;
+        text-decoration: none; }
+      .calendricalTimePopup ul li a:hover, .calendricalTimePopup ul li.selected a {
+        background: #ccccff; }
+
+.calendricalEndTimePopup {
+  width: 160px; }
+/* Fin Calendrier */
+
+/* FileUpload */
+.file_upload {
+  position: relative;
+  overflow: hidden;
+  direction: ltr;
+  cursor: pointer;
+  text-align: center;
+  color: #333;
+  font-weight: bold;
+  //-moz-border-radius: 10px;
+  //-webkit-border-radius: 10px;
+  //border-radius: 10px;
+  //width: 200px;
+  //height: 30px;
+  //line-height: 30px;
+  //background: palegreen;
+  border: 1px solid black;
+}
+
+.file_upload_small {
+  width: 200px;
+  height: 30px;
+  line-height: 30px;
+  font-size: auto;
+  background: palegreen;
+  border: 1px solid limegreen;
+}
+
+.file_upload_large {
+  width: 100%;
+  height: 150px;
+  line-height: 150px;
+  font-size: 20px;
+  background: palegreen;
+  border: 1px solid limegreen;
+}
+
+.file_upload_highlight {
+  background: lawngreen;
+}
+
+.file_upload input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  border: 300px solid transparent;
+  opacity: 0;
+  -ms-filter: 'alpha(opacity=0)';
+  filter: alpha(opacity=0);
+  -o-transform: translate(0, -300px) scale(6);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.file_upload iframe, .file_upload button {
+  display: none;
+}
+
+.file_upload_progress .ui-progressbar-value {
+  background: url(pbar-ani.gif);
+}
+
+.file_upload_progress div {
+  width: 150px;
+  height: 15px;
+}
+
+.file_upload_cancel div {
+  cursor: pointer;
+}
+/* Fin FileUpload */
+
+/* ADMIN */
+.doublon td {
+    background-color: WhiteSmoke;
+    padding-left: 15px;
+    border-bottom-color: black;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+}
+.recherche_doublon {
+    background-color: SkyBlue;
+}
+
+/* Fin ADMIN */

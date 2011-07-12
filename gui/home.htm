@@ -1,0 +1,38 @@
+<h3>
+	<F3:check if="{@SESSION.user}">
+		<F3:true>Welcome {ucfirst(@SESSION.user)}!</F3:true>
+		<F3:false>{@pagetitle}</F3:false>
+	</F3:check>
+</h3>
+<F3:check if="{@entries}">
+	<F3:true>
+		<F3:repeat key="{@key}" index="{@item}" group="{@entries}">
+			<h4 class="blogtitle">{@item.title}</h4>
+			<a name="{strtotime(@item.time)}"></a>
+			<div class="blogtime">Posted {@item.time}</div>
+			<div class="{@key%2?'even':'odd'}">{nl2br(htmlspecialchars_decode(@item.entry))}</div>
+			<p class="spacer"/>
+			<F3:check if="{@SESSION.user}">
+				<F3:true>
+					<p>
+						<small>
+						<a href="/edit/{strtotime(@item.time)}">Edit</a> |
+						<a href="/delete/{strtotime(@item.time)}" onclick="return confirm('Are your sure you want to delete this entry?')">Delete</a>
+						</small>
+					</p>
+				</F3:true>
+			</F3:check>
+		</F3:repeat>
+		<F3:check if="{!@SESSION.user}">
+			<F3:true>
+				<p><a href="/rss"><img src="/{@GUI}gfx/rss-icon.png"/></a> <small>Subscribe to this feed</small></p>
+			</F3:true>
+		</F3:check>
+	</F3:true>
+	<F3:false><p>There are no blog entries yet.</p></F3:false>
+</F3:check>
+<F3:check if="{@SESSION.user}">
+	<F3:true>
+		<p><small><a href="/create">+ Add blog entry</a></small></p>
+	</F3:true>
+</F3:check>

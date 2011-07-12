@@ -1,0 +1,58 @@
+<h3>{{@pagetitle}}</h3>
+<form name="festival" method="post" action="{{@PARAMS.0}}" >
+	<F3:check if="{{@message}}">
+		<F3:true><p class="fail">{{@message}}</p></F3:true>
+	</F3:check>
+	
+	<F3:check if="{{@editer}}">
+		<F3:true>
+			<p class="warn">Un raccourcissement des dates du festival entrainera la perte de tous les évenements associés</p>
+		</F3:true>
+	</F3:check>
+	
+	<dl>
+		<dt><label for="annee">Année</label></dt>
+		<dd><input type="text" name="annee" id="annee" value="{{@REQUEST.annee}}" size="60"/></dd>
+		<dt><label for="libelle">Libellé</label></dt>
+		<dd><input type="text" name="libelle" id="libelle" value="{{@REQUEST.libelle}}" size="60"/></dd>
+		<dt><label for="debut">Début</label></dt>
+		<dd><input type="text" id="debut" name="debut" value="{{@debut}}"/></dd>
+		<dt><label for="fin">fin</label></dt>
+		<dd><input type="text" id="fin" name="fin" value="{{@fin}}"/></dd>
+		<dt><label for="taux_horaire">Taux Horaire</label></dt>
+		<dd><input type="text" name="taux_horaire" id="taux_horaire" value="{{@REQUEST.taux_horaire}}" size="10"/></dd>
+		<p/>
+		<dd><input type="submit" name="submit" value="Valider"/></dd>
+	</dl>
+</form>
+
+	<script>
+	$(function() {
+		now = new Date();
+		var dates = $( "#debut, #fin" ).datepicker({
+			defaultDate: "+1w",
+			firstDay: 1,
+			minDate: new Date(now.getFullYear(), 1 - 1, 1),
+			prevText: 'Précédent',
+			nextText: 'Suivant',
+			dateFormat: 'dd/mm/yy',
+			changeMonth: true,
+			numberOfMonths: 1,
+			dayNamesMin: ['Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa'],
+			monthNamesShort: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Décembre'],
+			changeYear: true,
+        showOn: "button",
+			  buttonImage: "/gui/images/gfx/calendar.gif",
+			  buttonImageOnly: true,
+			onSelect: function( selectedDate ) {
+				var option = this.id == "debut" ? "minDate" : "maxDate",
+					instance = $( this ).data( "datepicker" );
+					date = $.datepicker.parseDate(
+						instance.settings.dateFormat ||
+						$.datepicker._defaults.dateFormat,
+						selectedDate, instance.settings );
+				dates.not( this ).datepicker( "option", option, date );
+			}
+		});
+	});
+	</script>

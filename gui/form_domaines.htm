@@ -1,0 +1,74 @@
+
+<style>
+.ui-autocomplete-loading {
+	background: white url('../../gui/images/gfx/ui-anim_basic_16x16.gif')
+		right center no-repeat;
+}
+
+.ui-autocomplete {
+	max-height: 100px;
+	overflow-y: auto;
+}
+</style>
+
+<h3>{{@pagetitle}}</h3>
+<form name="organisme" method="post" action="{{@PARAMS.0}}"><F3:check
+	if="{{@message}}">
+	<F3:true>
+		<p class="fail">{{@message}}</p>
+	</F3:true>
+</F3:check>
+<dl>
+	<dt><label for="libelle">Libelle</label></dt>
+	<dd><input type="text" name="libelle" id="libelle"
+		value="{{@REQUEST.libelle}}" required /></dd>
+
+	<dt><label for="responsable">Responsable</label></dt>
+	<dd><input type="text" name="responsable" id="responsable"
+		value="{{@REQUEST.responsable}}"
+		onkeypress="handleEnter(this, event)"
+		required /></dd>
+	<dd><input type="hidden" name="responsable_id" id="responsable_id"
+		value="{{@REQUEST.responsable_id}}" /></dd>
+	<p />
+	<dd><input type="submit" name="submit" value="Valider" /></dd>
+</dl>
+</form>
+
+<table id="listeLieux"></table>
+<div id="pagerLieux"></div>
+<div id="filter" style="margin-left: 30%; display: none">recherche</div>
+
+<a href="/vacations/imprimer/emargement/domaine/{{@REQUEST.id}}">Imprimer les feuilles d'emargement du domaine</a>
+| <a href="/vacations/imprimer/domaine/{{@REQUEST.id}}">Imprimer les affectations des membres de ce domaine</a>
+
+
+<F3:include href="{{@ERROR?'error':@liste_vacations}}.htm" />
+
+
+<script>
+	function handleEnter(inField, e) {
+		var charCode;
+
+		if (e && e.which) {
+			charCode = e.which;
+		} else if (window.event) {
+			e = window.event;
+			charCode = e.keyCode;
+		}
+
+		if (charCode != 13) {
+			onkeypress = "javascript:document.getElementById('responsable_id').value = 0;"
+		}
+	}
+
+	$(function() {
+		$("#responsable").autocomplete( {
+			source : "/ajax/profils",
+			minLength : 3,
+			select : function(event, ui) {
+				document.getElementById('responsable_id').value = ui.item.id;
+			}
+		});
+	});
+</script>

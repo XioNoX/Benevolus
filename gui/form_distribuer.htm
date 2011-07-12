@@ -1,0 +1,211 @@
+
+
+<h3>{{@pagetitle}}</h3>
+
+<p class="success" id="succes"></p>
+
+<F3:check
+	if="{{@nb_non_affectes > 0}}">
+	<F3:true>
+		<p class="warn">Organismes sans affectations : {{@nb_non_distribues}}</p>
+	</F3:true>
+</F3:check>
+
+<div>
+	<table id="liste_organismes"></table>
+	<div id="pager_liste_organismes"></div>
+	
+	<table id="liste_vacations"></table>
+	<div id="pager_liste_vacations"></div>
+	<div id="filter" style="margin-left: 30%; display: none">recherche</div>
+</div>
+<input type="submit" onclick="assigner()" value="Distribuer" name="assigner" />
+
+<div id="informationsVacations"></div>
+<div id="informationsOrganismes"></div>
+
+<div id="dialog_del" title="Supprimer ?">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Supprimer ?</p>
+</div>
+
+
+
+<script type="text/javascript">
+
+var organismesSelectionnes = new Array;
+var vacationsSelectionnes = new Array;
+
+$("#dialog_del").dialog({
+          autoOpen: false,
+          modal: true,
+		      buttons : {
+		        "Supprimer" : function() {
+
+            //Exécution du script PHP avec Ajax  
+            $.get('/ajax/organismes', { 
+                action:'supprimer',id:id_suppr
+            }, function(data){
+               if(data == "OK"){	
+                element.parent().eq(0).fadeOut("slow");
+               }else
+               {
+                element.parent().eq(0).append(data);
+               }
+            });
+                $(this).dialog("close");
+		        },
+		        "Annuler" : function() {
+		          $(this).dialog("close");
+		        }
+		      }
+		    });
+
+
+$(".supprimerAffectation").live('click', function(e) {
+		    e.preventDefault();
+        element = $(this);
+		    id_suppr = element.attr("id");	
+		    $("#dialog_del").dialog("open");
+		  });
+
+$(function(){
+  var mygrid_organismes = jQuery("#liste_organismes").jqGrid({
+  scroll: true,
+  loadonce: true,
+    url:'/ajax/organismes',
+    datatype: 'json',
+    mtype: 'GET',
+    width: '315',
+    //autowidth: true,
+    height: 300,
+    colNames:['id','Libelle','Ville','Type'],
+    colModel :[
+      {name:'id', index:'id', width:50, formatter: formateadorLink}, 
+      {name:'libelle', index:'libelle', width:90}, 
+      {name:'nom', index:'nom', width:90}, 
+      {name:'type_organ', index:'type_struct', width:75, stype:'select', editoptions:{value:":Tout;Association:Association;Fournisseur:Fournisseur;Individu:Individu"}}
+    ],
+    pager: '#pager_liste_organismes',
+   //rowNum:20,
+   // rowList:[20,40,60],
+    rowTotal: 3000,
+    sortname: 'id',
+    sortorder: 'desc',
+    ignoreCase: true,
+    viewrecords: true,
+    gridComplete: function() { $('#liste_organismes .jqgrow').mouseover(function(e) { var rowId = $(this).attr('id'); afficherInfosOrganismes(rowId); }); },
+    gridview : true,
+    multiselect: true,
+    onSelectRow: function(id){
+        		
+		var trouve = false;
+		for (var i = 0; i < organismesSelectionnes.length; i++) {
+			if(organismesSelectionnes[i]==id)
+			{
+				trouve = true;
+				organismesSelectionnes.splice(i,1);
+			}
+		}
+		if (!trouve)
+			organismesSelectionnes.push(id);
+    }
+  }); 
+  jQuery("#liste_organismes").jqGrid('filterToolbar');
+
+  jQuery("#liste_organismes").jqGrid('navGrid','#pager_liste_organismes',{edit:false,add:false,del:false,search:false,refresh:false});
+
+  function formateadorLink(cellvalue, options, rowObject) {
+      return "<a href=/organismes/editer/"+ cellvalue + ">" + cellvalue + "</a>";
+	}
+
+  var mygrid_vacations = jQuery("#liste_vacations").jqGrid({
+  scroll: true,
+  loadonce: true,
+    url:'/ajax/vacations_assigner',
+    datatype: 'json',
+    mtype: 'GET',
+    width: '630',
+    //autowidth: true,
+    height: 300,
+    colNames:['id','domaine', 'lieu', 'Type', 'Jours', 'h debut', 'h fin', 'Occupé', 'Min', 'Max'],
+    colModel :[
+                {name:'id', index:'id', width:25, formatter: formateadorLink}, 
+                {name:'domaine', index:'domaine', width:60, stype:'select', editoptions:{value:"{{@domaines}"}},
+                {name:'lieu', index:'lieu', width:60, stype:'select', editoptions:{value:"{{@lieux}"}},
+                {name:'libelle', index:'libelle', width:20, stype:'select', editoptions:{value:":Tout;T0:T0;T1:T1;T1BIS:T1BIS;T2:T2;T3:T3;T4:T4"}},
+                {name:'jour', index:'jour', width:40, stype:'select', editoptions:{value:"{{@jours}"}},
+                {name:'heure_debut', width:40,index:'heure_debut'},
+                {name:'heure_fin', width:40, index:'heure_fin'},
+                {name:'occupe', width:20, index:'occupe'},
+                {name:'nombre_minimum', width:20, index:'nombre_minimum'},
+                {name:'nombre_maximum', width:20, index:'nombre_maximum'}
+
+
+              ],
+    pager: '#pager_liste_vacations',
+   // rowNum:20,
+   // rowList:[20,40,60],
+    rowTotal: 3000,
+    sortname: 'id',
+    sortorder: 'desc',
+    viewrecords: true,
+    ignoreCase: true,
+    //gridComplete: function() { $('#liste_vacations .jqgrow').mouseover(function(e) { var rowId = $(this).attr('id'); afficherInfosVacation(rowId); }); },
+    gridview : true,
+    multiselect: true,
+    onSelectRow: function(id)
+    {
+	  var trouve = false;
+		for (var i = 0; i < vacationsSelectionnes.length; i++) {
+			if(vacationsSelectionnes[i]==id)
+			{
+				trouve = true;
+				vacationsSelectionnes.splice(i,1);
+			}
+		}
+		if (!trouve)
+			vacationsSelectionnes.push(id);
+	}
+
+  //editurl: "{{@jquery_url_edit2}"
+  }); 
+jQuery("#liste_vacations").jqGrid('filterToolbar');
+
+jQuery("#liste_vacations").jqGrid('navGrid','#pager_liste_vacations',{edit:false,add:false,del:false,search:false,refresh:false});
+
+
+
+}); 
+
+
+function afficherInfosOrganismes(id){
+            $.get('/ajax/organismes', { 
+                action:'afficher',id:id
+            }, function(data){
+			          var message = '<div class="info">' + data + '</p>';
+		          	document.getElementById("informationsOrganismes").innerHTML = message;	
+            });
+}
+
+function afficherInfosVacation(id){
+			//var message = '<div class="info" id="pinfosOrganismes">coucou ' + id + '</p>';
+			//document.getElementById("informationsVacations").innerHTML = message;	
+}
+
+
+function assigner()
+{        
+            //Exécution du script PHP avec Ajax  
+            $.post('{{@PARAMS.0}}', { 
+                organismes:organismesSelectionnes.join(","),
+                vacations:vacationsSelectionnes.join(",") 
+            }, function(data){
+            	alert(data);
+              $("#liste_organismes").trigger("reloadGrid");  
+              $("#liste_vacations").trigger("reloadGrid");
+              individusSelectionnes = new Array;
+              vacationsSelectionnes = new Array;
+            });
+
+} 
+</script>

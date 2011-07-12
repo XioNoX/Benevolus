@@ -1,0 +1,71 @@
+<h3>{{@pagetitle}}</h3>
+
+
+<F3:check if="{{@domaines}}">
+	<F3:true>
+		<p class="info">
+			Vous faites parti des domaines :
+			<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@domaines}}">
+				<a href="/mondomaine/{{@item.id}}">{{@item.libelle}}</a> |
+			</F3:repeat>
+		</p>
+	</F3:true>
+	<F3:false>
+	<p class="fail">
+	Vous n'êtes membre d'aucun domaine
+	</p>
+	</F3:false>
+</F3:check>
+		
+<F3:check if="{{@mesdomaines}}">
+	<F3:false>
+		<F3:check if="{{@domaine}}">
+			<F3:true>
+				<F3:check if="{{@estResponsable}}">
+					<F3:true>
+						<p class="warn">
+							Vous êtes responsable de ce domaine. Vous pouvez l'éditer en <a href="/domaines/editer/{{@domaine[0].id}}">cliquant ici</a> <br/>
+						</p>
+					</F3:true>
+				</F3:check>
+				
+				<div id="profil_gauche">
+					<div class="info" style="margin-bottom:15px;">
+						<b>Domaine :</b><br/>
+						{{@domaine[0].libelle}}<br/>
+						<b>Responsable : </b><br/>
+						<F3:check if="{{@responsable}}">
+							<F3:true>
+								<a href="/profil/{{@responsable[0].id}}">{{@responsable[0].prenom}} {{@responsable[0].nom}}</a>
+							</F3:true>
+							<F3:false>
+								Inconnu
+							</F3:false>
+						</F3:check>
+					</div>
+					
+					<F3:check if="{{@nb_membres}}">
+						<F3:true>
+							 
+							{{@nb_membres}} membres
+							<ul>
+								<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@membres}}">
+									<li><a href="/profil/{{@item.id}}">{{@item.prenom}} {{@item.nom}}</a></li>
+								</F3:repeat>
+							</ul>
+						</F3:true>
+						<F3:false><p>Aucun membre dans ce domaine</p></F3:false>
+					</F3:check>
+				</div>
+				
+				<div id="profil_droit">
+					Vous êtes membre de ce domaine
+				</div>
+				
+			</F3:true>
+			<F3:false>
+				<p class="fail">Vous n'êtes pas membre de ce domaine</p>
+			</F3:false>
+		</F3:check>
+	</F3:false>
+</F3:check>

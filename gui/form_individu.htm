@@ -1,0 +1,580 @@
+<h3>{{@pagetitle}}</h3>
+
+<F3:check if="{{@erreur}}">
+	<F3:true>
+		<p class="fail">{{@erreur}}</p>
+	</F3:true>
+	<F3:false>
+		<div id="information"><F3:check if="{{@message}}">
+			<F3:true>
+				<p class="fail" id="fail">{{@message}}</p>
+			</F3:true>
+		</F3:check> <F3:check if="{{@succes}}">
+			<F3:true>
+				<p class="pass">{{@succes}}</p>
+			</F3:true>
+		</F3:check></div>
+
+		<div id="profil">
+
+		<div id="profil_gauche">
+			<F3:check if="{{@SESSION.id}}">
+				<F3:true>
+				<a href=/profil/{{@PARAMS.id}}>Profil</a>
+				</F3:true>
+			</F3:check>
+		<div class="upload_files"></div>
+		<div class="download_files" id="download_files"><F3:check
+			if="{{@REQUEST.photo}}">
+			<F3:true>
+				<img src="/uploads/photos/{{@REQUEST.photo}}"
+					style="margin-bottom: 10px;" \/>		
+
+			</F3:true>
+		</F3:check></div>
+		<!-- TODO : Eviter l'envoie de millions de photos -->
+		<form class="upload" id="upload" action="/profil/photo/envoi"
+			method="POST" enctype="multipart/form-data"><input type="file"
+			name="file">
+		<button>Choisir ma photo</button>
+		<div>Choisir ma photo</div>
+		</form>
+		</div>
+
+		<div id="profil_droit">
+		<form name="form_individu" novalidate id="form_individu" method="post"
+			action="{{@PARAMS.0}}" onsubmit="return verif();" autocomplete="off">
+
+		<div class="profil_bloc">
+		<div class="profil_infos_perso">
+		<fieldset><legend>Informations personnelles</legend> <input
+			type="hidden" name="photo" id="photo" value="{{@REQUEST.photo}}">
+
+		<F3:check if="{{@SESSION.acces_web >= @acces_operateur}}">
+			<F3:true>
+				<dt><label for="nom">Nom</label></dt>
+				<dd><input type="text" name="nom" id="nom"
+					value="{{@REQUEST.nom}}" required /></dd>
+				<dt><label for="prenom">Prénom</label></dt>
+				<dd><input type="text" name="prenom" id="prenom"
+					value="{{@REQUEST.prenom}}" required /></dd>
+				<dt><label for="date_naissance">Date de naissance</label></dt>
+				<dd><input type="text" name="date_naissance"
+					id="date_naissance" value="{{@REQUEST.date_naissance}}" required />
+				</dd>
+			</F3:true>
+			<F3:false>
+				<dt><label for="nom">Nom</label></dt>
+				<dd><input type="text" name="nom" id="nom"
+					value="{{@REQUEST.nom}}" required readonly /></dd>
+				<dt><label for="prenom">Prénom</label></dt>
+				<dd><input type="text" name="prenom" id="prenom"
+					value="{{@REQUEST.prenom}}" required readonly /></dd>
+				<dt><label for="date_naissance">Date de naissance</label></dt>
+				<dd><input type="text" name="date_naissance"
+					id="date_naissance" value="{{@REQUEST.date_naissance}}" required
+					readonly /></dd>
+            Veuillez contacter le service bénévoles pour modifier ces informations.
+            <script>
+													$("#date_naissance").datepicker(
+																	"destroy");
+												</script>
+			</F3:false>
+			</F3:check>
+			<F3:check
+			if="{{@REQUEST.photo}}">
+			<F3:true>
+			<label for="supprimer_photo">Supprimer la photo</label>
+			<input type="checkbox" name="supprimer_photo" value="on">
+			</F3:true>
+			</F3:check>
+			<!-- TODO: Gestion de l'autorisation parentale --></fieldset>
+		</div>
+
+		<div class="profil_identification"><F3:check if="{{@inscription}}">
+			<F3:false>
+
+				<fieldset id="identification"><legend>Identification</legend>
+
+				<!-- <F3:check if="{{@inscription}}">
+							<F3:true>
+								<dt><label for="mdp">Mot de passe (exemple : {{@exempleMDP}} )</label></dt>
+							</F3:true>
+							<F3:false>
+								<F3:check if="{{@SESSION.acces_web == @acces_individu}}">
+									<F3:true>
+										<dt><label for="ancien_mdp">Mot de passe actuel</label></dt>
+										<dd><input type="password" id="ancien_mdp" name="ancien_mdp" value="" /></dd>
+									</F3:true>
+									<F3:false>
+										<F3:check if="{{@profil}}">
+										<F3:true>
+											<dt><label for="ancien_mdp">Mot de passe actuel</label></dt>
+											<dd><input type="password" id="ancien_mdp" name="ancien_mdp" value="" /></dd>
+										</F3:true>
+									</F3:false>
+								</F3:check>
+								<dt><label for="mdp">Nouveau mot de passe (exemple : {{@exempleMDP}} )</label></dt>
+							</F3:false>
+						</F3:check>--> <F3:check if="{{@inscription}}">
+					<F3:false>
+						<F3:check if="{{@SESSION.acces_web == @acces_individu}}">
+							<F3:true>
+								<dt><label for="ancien_mdp">Mot de passe actuel</label></dt>
+								<dd><input type="password" id="ancien_mdp"
+									name="ancien_mdp" value="" /></dd>
+							</F3:true>
+							<F3:false>
+								<F3:check if="{{@profil}}">
+									<F3:true>
+										<dt><label for="ancien_mdp">Mot de passe actuel</label></dt>
+										<dd><input type="password" id="ancien_mdp"
+											name="ancien_mdp" value="" /></dd>
+									</F3:true>
+							</F3:false>
+						</F3:check>
+						<dt><label for="mdp">Nouveau mot de passe (exemple :
+						{{@exempleMDP}} )</label></dt>
+					</F3:false>
+				</F3:check>
+
+				<dd><input type="password" id="mdp" name="mdp" value="" /></dd>
+				<dt><label for="mdp_bis">Vérification du mot de passe</label></dt>
+				<dd><input type="password" id="mdp_bis" name="mdp_bis" value="" />
+				</dd>
+				</fieldset>
+			</F3:false>
+		</F3:check></div>
+
+
+
+		</div>
+
+		<div class="profil_bloc">
+		<fieldset><legend>Coordonnées</legend>
+
+		<div class="profil_coordonnees_1">
+		<dt><label for="telephone_fixe">Téléphone fixe
+		(0123456789)</label></dt>
+		<dd><input type="text" name="telephone_fixe" id="telephone_fixe"
+			value="{{@REQUEST.telephone_fixe}}" /></dd>
+		<dt><label for="telephone_portable">Téléphone portable
+		(0612345678)</label></dt>
+		<dd><input type="text" name="telephone_portable"
+			id="telephone_portable" value="{{@REQUEST.telephone_portable}}" /></dd>
+		<dt><label for="email">Email</label></dt>
+		<dd><input type="text" id="email" name="email"
+			value="{{@REQUEST.email}}" /></dd>
+		</div>
+		<div class="profil_coordonnees_2">
+		<dt><label for="adresse1">Adresse 1</label></dt>
+		<dd><input type="text" name="adresse1" id="adresse1"
+			value="{{@REQUEST.adresse1}}" required /></dd>
+		<dt><label for="adresse2">Adresse 2 (facultatif)</label></dt>
+		<dd><input type="text" name="adresse2" id="adresse2"
+			value="{{@REQUEST.adresse2}}" /></dd>
+		<dt><label for="ville">Ville</label></dt>
+		<dd><input type="text" name="ville" id="ville"
+			value="{{@REQUEST.ville}}" onkeypress="handleEnterVille(this, event)"
+			autocomplete='off' required /></dd>
+		<dd><input type="hidden" name="ville_id" id="ville_id"
+			value="{{@REQUEST.ville_id}}" /></dd>
+		</div>
+		</fieldset>
+		</div>
+
+		<F3:check if="{{@SESSION.acces_web >= @acces_operateur}}">
+			<F3:true>
+				<div class="profil_bloc">
+				<fieldset><legend> Administrateur - <a
+					href="/profils/anonymiser/{{@PARAMS.id}}" class="anonymiser">Anonymiser/Supprimer</a>
+				</legend>
+
+				<div class="profil_admin_1">
+				<dt><label for="commentaire">Commentaire</label></dt>
+				<dd><textarea name="commentaire" id="commentaire" rows="2"
+					cols="70">{{@REQUEST.commentaire}}</textarea></dd>
+				</div>
+
+				<div class="profil_admin_2"><F3:check if="{{@acces_web}}">
+					<F3:true>
+						<dt><label>Acces web</label></dt>
+						<dd><select name="acces_web">
+
+							<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@acces_web}}">
+
+								<F3:check if="{{@REQUEST.acces_web == @item.id}}">
+									<F3:true>
+										<option value="{{@item.id}}" selected>{{@item.libelle}}</option>
+									</F3:true>
+									<F3:false>
+										<option value="{{@item.id}}">{{@item.libelle}}</option>
+									</F3:false>
+								</F3:check>
+
+							</F3:repeat>
+						</select></dd>
+				</F3:check></div>
+				<div class="profil_admin_2"><F3:check if="{{@statuts}}">
+					<F3:true>
+						<dt><label>Type de statut</label></dt>
+						<dd><select name="statut_id">
+							<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@statuts}}">
+
+								<F3:check if="{{@REQUEST.statut_id == @item.id}}">
+									<F3:true>
+										<option value="{{@item.id}}" selected>{{@item.libelle}}</option>
+									</F3:true>
+									<F3:false>
+										<option value="{{@item.id}}">{{@item.libelle}}</option>
+									</F3:false>
+								</F3:check>
+
+							</F3:repeat>
+						</select></dd>
+				</F3:check></div>
+				</fieldset>
+				</div>
+			</F3:true>
+		</F3:check> 
+		<input type="submit" name="submit" value="Valider"
+			style="width: 100px; float: left" /></form>
+		</div>
+		</div>
+
+		<div id="dialog" title="Anonymiser/supprimer ?">
+		<p><span class="ui-icon ui-icon-alert"
+			style="float: left; margin: 0 7px 20px 0;"></span>Ceci aura le même
+		effet que de supprimer le compte. Étes vous sûr ?</p>
+		</div>
+
+		<F3:check if="{{@SESSION.acces_web >= @acces_operateur}}">
+			<F3:true>
+				<script>
+				$(function() {
+					now = new Date();
+					$("#date_naissance").datepicker(
+							{
+								defaultDate : "+1w",
+								firstDay : 1,
+								yearRange : '1910:2011',
+								prevText : 'Précédent',
+								nextText : 'Suivant',
+								dateFormat : 'dd/mm/yy',
+								changeMonth : true,
+								numberOfMonths : 1,
+								dayNamesMin : [ 'Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve',
+										'Sa' ],
+								monthNamesShort : [ 'Janvier', 'Février', 'Mars',
+										'Avril', 'Mai', 'Juin', 'Juillet', 'Aout',
+										'Septembre', 'Octobre', 'Novembre',
+										'Décembre' ],
+								changeYear : true,
+								showOn : "button",
+								buttonImage : "/gui/images/gfx/calendar.gif",
+								buttonImageOnly : true
+							});
+				});
+				</script>
+			</F3:true>
+		</F3:check>
+
+		<script>
+			function handleEnterVille(inField, e) {
+				var charCode;
+
+				if (e && e.which) {
+					charCode = e.which;
+				} else if (window.event) {
+					e = window.event;
+					charCode = e.keyCode;
+				}
+
+				if (charCode != 13) {
+					onkeypress = "javascript:document.getElementById('ville_id').value = 0;"
+				}
+			}
+
+			/*global $ */
+			$(function() {
+				$('.upload')
+						.fileUploadUI(
+								{
+									uploadTable : $('.upload_files'),
+									downloadTable : $('.download_files'),
+									buildUploadRow : function(files, index) {
+										var file = files[index];
+										return $('<tr>'
+												+ '<td class="file_upload_progress"><div><\/div><\/td>'
+												+ '<td class="file_upload_cancel">'
+												+ '<div class="ui-state-default ui-corner-all ui-state-hover" title="Cancel">'
+												+ '<\/div>' + '<\/td>'
+												+ '<\/tr>');
+									},
+									buildDownloadRow : function(file) {
+										document
+												.getElementById("download_files").innerHTML = '';
+										document.getElementById('photo').value = file.name;
+										return $('<img src="../uploads/photos/' + file.name + '" style="margin-bottom:10px;" \/>');
+									},
+									beforeSend : function(event, files, index,
+											xhr, handler, callBack) {
+										if (files[index].size > 5000000) {
+											document
+													.getElementById("information").innerHTML = '<p class="fail" id="fail">Le poids de l\'image est trop important (5Mo maximum autorisé)</p>';
+											setTimeout(
+													function() {
+														handler
+																.removeNode(handler.uploadRow);
+													}, 10000);
+											return;
+										}
+										var regexp = /\.(png)|(jpg)|(jpeg)|(gif)$/i;
+										// Using the filename extension for our test,
+										// as legacy browsers don't report the mime type
+										if (!regexp.test(files[index].name)) {
+											document
+													.getElementById("information").innerHTML = '<p class="fail" id="fail">Seules les images au format png, jpg, jpeg, et gif sont acceptées</p>';
+											setTimeout(
+													function() {
+														handler
+																.removeNode(handler.uploadRow);
+													}, 10000);
+											return;
+										}
+										callBack();
+									}
+								});
+			});
+
+			$(function() {
+				$("#ville").autocomplete({
+					source : "/ajax/ville",
+					minLength : 3,
+					select : function(event, ui) {
+						document.getElementById('ville_id').value = ui.item.id;
+					}
+				});
+			});
+
+			$(document).ready(function() {
+				$("#dialog").dialog({
+					autoOpen : false,
+					modal : true
+				});
+			});
+
+			$(".anonymiser").click(function(e) {
+				e.preventDefault();
+				var targetUrl = $(this).attr("href");
+
+				$("#dialog").dialog({
+					buttons : {
+						"Anonymiser" : function() {
+							window.location.href = targetUrl;
+						},
+						"Annuler" : function() {
+							$(this).dialog("close");
+						}
+					}
+				});
+
+				$("#dialog").dialog("open");
+			});
+
+			function verif() {
+				var nom = document.getElementById("nom").value;
+				var prenom = document.getElementById("prenom").value;
+				var date_naissance = document.getElementById("date_naissance").value;
+				var telephone_fixe = document.getElementById("telephone_fixe").value;
+				var telephone_portable = document
+						.getElementById("telephone_portable").value;
+				var email = document.getElementById("email").value;
+				var adresse1 = document.getElementById("adresse1").value;
+				var adresse2 = document.getElementById("adresse2").value;
+				var ville_id = document.getElementById("ville_id").value;
+				var mdp = document.getElementById("mdp").value;
+				var mdp_bis = document.getElementById("mdp_bis").value;
+				var statut = "ok"
+				var erreur = '';
+
+				//Vertif nom
+				if ((nom != "") && (nom.length <= 255)) {
+					document.getElementById("nom").style.backgroundColor = '#8bed95';
+
+				} else {
+					document.getElementById("nom").style.backgroundColor = '#ee7979';
+					erreur += 'Merci de saisir un nom<br/>';
+					statut = "nok";
+				}
+
+				//Verif prenom
+				if ((prenom != "") && (prenom.length <= 255)) {
+					document.getElementById("prenom").style.backgroundColor = '#8bed95';
+				} else {
+					document.getElementById("prenom").style.backgroundColor = '#ee7979';
+					erreur += 'Merci de saisir un prenom<br/>';
+					statut = "nok";
+				}
+
+				//Verif date de naissance
+				if ((date_naissance != "")
+						&& (date_naissance
+								.search(/^[0|1|2|3][0-9]\/[0|1][0-9]\/[0-9][0-9][0-9][0-9]$/) == 0)) {
+					document.getElementById("date_naissance").style.backgroundColor = '#8bed95';
+				} else {
+					document.getElementById("date_naissance").style.backgroundColor = '#ee7979';
+					erreur += 'Merci de saisir votre date de naissance<br/>';
+					statut = "nok";
+				}
+
+				//Verif telephone fixe
+				if ((telephone_fixe != "") || (telephone_portable != "")) {
+					if ((telephone_fixe != "")
+							&& (telephone_fixe
+									.search(/^0[1|2|3|4|5|8|9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/) == 0)) {
+						document.getElementById("telephone_fixe").style.backgroundColor = '#8bed95';
+					} else if ((telephone_fixe != "")
+							&& (telephone_fixe
+									.search(/^0[1|2|3|4|5|8|9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/) == -1)) {
+						document.getElementById("telephone_fixe").style.backgroundColor = '#ee7979';
+						erreur += 'Merci de saisir votre numéro de téléphone fixe<br/>';
+						statut = "nok";
+					} else {
+						document.getElementById("telephone_fixe").style.backgroundColor = '#ffffff'
+					}
+
+					//Verif telephone portable
+					if ((telephone_portable != "")
+							&& (telephone_portable
+									.search(/^0[6|7][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/) == 0)) {
+						document.getElementById("telephone_portable").style.backgroundColor = '#8bed95';
+					} else if (telephone_portable != "") {
+						document.getElementById("telephone_portable").style.backgroundColor = '#ee7979';
+						erreur += 'Merci de saisir votre numéro de téléphone portable<br/>';
+						statut = "nok";
+					} else {
+						document.getElementById("telephone_portable").style.backgroundColor = '#ffffff'
+					}
+				} else {
+					erreur += 'Merci de saisir un numéro de téléphone fixe ou de mobile<br/>';
+					statut = "nok";
+				}
+
+				//Verif email
+				if ((email == "")
+						|| (email
+								.search(/^([a-zA-Z0-9_.-])+@([a-zA-Z0-9_.-])+\.([a-zA-Z])+([a-zA-Z])+/) == 0)) //XXX regexp pas complete
+				{
+					document.getElementById("email").style.backgroundColor = '#8bed95';
+				} else {
+					document.getElementById("email").style.backgroundColor = '#ee7979';
+					erreur += 'Merci de saisir votre adresse email<br/>';
+					statut = "nok";
+				}
+
+				//Verif adresse1
+				if ((adresse1 != "") && (adresse1.length <= 255)) {
+					document.getElementById("adresse1").style.backgroundColor = '#8bed95';
+				} else {
+					document.getElementById("adresse1").style.backgroundColor = '#ee7979';
+					erreur += 'Merci de saisir votre adresse<br/>';
+					statut = "nok";
+				}
+
+				//Verif adresse2
+				if ((adresse2 != "") && (adresse2.length <= 255)) {
+					document.getElementById("adresse2").style.backgroundColor = '#8bed95';
+				} else if ((adresse2 != "") && (adresse2.length > 255)) {
+					document.getElementById("adresse2").style.backgroundColor = '#ee7979';
+					erreur += 'Votre adresse 2 est trop longue<br/>';
+					statut = "nok";
+				} else {
+					document.getElementById("adresse2").style.backgroundColor = '#ffffff';
+				}
+
+				//Verif ville_id
+				if ((ville_id) != 0 && (ville_id.search(/^[0-9]+$/) == 0)) {
+					document.getElementById("ville").style.backgroundColor = '#8bed95';
+				} else {
+					document.getElementById("ville").style.backgroundColor = '#ee7979';
+					erreur += 'Veuillez saisir votre ville et la sélectionner dans la liste<br/>';
+					statut = "nok";
+				}
+
+				if ((telephone_portable != "")
+						&& (telephone_portable
+								.search(/^0[6|7][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/) == 0)) {
+					document.getElementById("telephone_portable").style.backgroundColor = '#8bed95';
+				} else if (telephone_portable != "") {
+					document.getElementById("telephone_portable").style.backgroundColor = '#ee7979';
+					erreur += 'Merci de saisir votre numéro de téléphone portable<br/>';
+					statut = "nok";
+				} else {
+					document.getElementById("telephone_portable").style.backgroundColor = '#ffffff'
+				}
+
+				//Verif mot de passe (mode edition)
+				if (document.getElementById("ancien_mdp")) {
+					var ancien_mdp = document.getElementById("ancien_mdp").value;
+
+					if (mdp != "") {
+						if (ancien_mdp != "") {
+							if (mdp.length >= 7) {
+								if (mdp == mdp_bis) {
+									document.getElementById("ancien_mdp").style.backgroundColor = '#8bed95';
+									document.getElementById("mdp").style.backgroundColor = '#8bed95';
+									document.getElementById("mdp_bis").style.backgroundColor = '#8bed95';
+								} else {
+									document.getElementById("mdp").style.backgroundColor = '#ee7979';
+									document.getElementById("mdp_bis").style.backgroundColor = '#ee7979';
+									erreur += 'Les deux mots de passe ne correspondent pas<br/>';
+									statut = "nok";
+								}
+							} else {
+								alert("foo");
+								document.getElementById("ancien_mdp").style.backgroundColor = '#ee7979';
+								document.getElementById("mdp").style.backgroundColor = '#ee7979';
+								document.getElementById("mdp_bis").style.backgroundColor = '#ee7979';
+								erreur += 'Votre mot de passe doit contenir au moins 7 caractères<br/>';
+								statut = "nok";
+							}
+						} else {
+							document.getElementById("ancien_mdp").style.backgroundColor = '#ee7979';
+							document.getElementById("mdp").style.backgroundColor = '#ee7979';
+							document.getElementById("mdp_bis").style.backgroundColor = '#ee7979';
+							erreur += 'Veuillez entrer votre mot de passe actuel pour tout changement de mot de passe<br/>';
+							statut = "nok";
+						}
+					}
+				}
+				/*else
+				{
+					if ((mdp != "") && ( mdp != mdp_bis ))
+					{
+							document.getElementById("mdp").style.backgroundColor='#ee7979';
+							document.getElementById("mdp_bis").style.backgroundColor='#ee7979';
+							erreur += 'Les deux mots de passe ne correspondent pas<br/>';
+							statut = "nok";
+					}
+					else if((mdp != "") && (mdp.length < 7))
+				{
+						document.getElementById("mdp").style.backgroundColor='#ee7979';
+						document.getElementById("mdp_bis").style.backgroundColor='#ee7979';
+						erreur += 'Votre mot de passe doit contenir au moins 7 caractères<br/>';
+						statut = "nok";
+					}
+				}*/
+
+				if (statut == "ok")
+					return true;
+				else {
+					document.getElementById("information").innerHTML = '<p class="fail" id="fail">'
+							+ erreur + '</p>';
+					return false;
+				}
+			}
+		</script>
+	</F3:false>
+</F3:check>
+

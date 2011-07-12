@@ -1,0 +1,9 @@
+<h3>{{@ERROR.title}}</h3>
+<h4>{{@ERROR.text}}</h4>
+<F3:check if="{{preg_match('/404/',@ERROR.code)}}">
+	<F3:true>
+	</F3:true>
+	<F3:false>
+		<p>{{@ERROR.trace}}</p>
+	</F3:false>
+</F3:check>

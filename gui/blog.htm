@@ -1,0 +1,21 @@
+<h3>{@pagetitle}</h3>
+<F3:check if="{@SESSION.user}">
+	<F3:true>
+		<form name="blog" method="post" action="{@PARAMS.0}" >
+			<F3:check if="{@message}">
+				<F3:true><p class="fail">{@message}</p></F3:true>
+			</F3:check>
+			<dl>
+				<dt><label for="title">Title</label></dt>
+				<dd><input type="text" name="title" id="title" value="{@REQUEST.title}" size="60"/></dd>
+				<dt><label for="entry">Entry</label></dt>
+				<dd><textarea name="entry" id="entry" cols="60" rows="10">{@REQUEST.entry}</textarea></dd>
+				<p/>
+				<dd><input type="submit" name="submit"/></dd>
+			</dl>
+		</form>
+	</F3:true>
+	<F3:false>
+		<p>You must be logged in to perform this task.</p>
+	</F3:false>
+</F3:check>

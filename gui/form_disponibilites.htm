@@ -1,0 +1,56 @@
+<h3>{{@pagetitle}}</h3>
+
+<F3:check if="{{@message}}">
+	<F3:true>
+		<p class="fail">{{@message}}</p>
+	</F3:true>
+</F3:check>
+
+<F3:check if="{{@succes}}">
+	<F3:true>
+		<p class="pass">{{@succes}}</p>
+	</F3:true>
+</F3:check>
+
+<form name="disponibilites" method="post" action="{{@PARAMS.0}}">
+
+<p class="info">
+En indiquant 00h00, 00h00 vous indiquez être libre toute la journée<br>
+Pour la planification de mes tranches horaires du jeudi, vendredi, samedi et du dimanche,
+je laisse libre choix au service des bénévoles des Vieilles Charrues.
+</p>
+
+<dl>
+	<dt>Jours</dt>
+	<dd>{{html_entity_decode(@contenu)}}</dd>
+	<dd><input type="submit" name="submit" value="Valider" /></dd>
+</dl>
+</form>
+
+<script>
+$(document).ready(function() {
+	$('.heure_debut').timepicker()
+});
+
+$(document).ready(function() {
+    $('.heure_fin').timepicker()
+});
+
+function actdesact(id)
+{
+    if (document.getElementById("disponibilite_"+id).checked)
+    {
+    	if (document.getElementById("heure_debut_"+id).value == "" )
+    		document.getElementById("heure_debut_"+id).value="00h00";
+    	if (document.getElementById("heure_fin_"+id).value == "" )
+    		document.getElementById("heure_fin_"+id).value="00h00";
+        document.getElementById("heure_debut_"+id).disabled=false;
+        document.getElementById("heure_fin_"+id).disabled=false;
+    }
+    else
+    {
+    	document.getElementById("heure_debut_"+id).disabled=true;
+        document.getElementById("heure_fin_"+id).disabled=true;
+    }
+}
+</script>

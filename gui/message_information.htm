@@ -1,0 +1,17 @@
+<h3>{{@pagetitle}}</h3>
+
+<F3:check if="{{@erreur}}">
+	<F3:true>
+		<p class="fail">{{@erreur}}</p>
+	</F3:true>
+</F3:check>
+<F3:check if="{{@warning}}">
+	<F3:true>
+		<p class="warn">{{@warning}}</p>
+	</F3:true>
+</F3:check>
+<F3:check if="{{@succes}}">
+	<F3:true>
+		<p class="pass">{{@succes}}</p>
+	</F3:true>
+</F3:check>

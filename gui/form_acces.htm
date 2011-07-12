@@ -1,0 +1,153 @@
+
+<style>
+.ui-autocomplete-loading {
+	background: white url('../../gui/images/gfx/ui-anim_basic_16x16.gif')
+		right center no-repeat;
+}
+
+.ui-autocomplete {
+	max-height: 100px;
+	overflow-y: auto;
+}
+</style>
+
+<h3>{{@pagetitle}}</h3>
+
+<F3:check if="{{@message}}">
+	<F3:true>
+		<p class="fail">{{@message}}</p>
+	</F3:true>
+</F3:check>
+<fieldset><legend>Individu :</legend>
+<form name="acces" method="post" action="{{@PARAMS.0}}">
+<dl>
+	<dt>Type d'accès</dt>
+	<dd><F3:check if="{{@acces_types}}">
+		<F3:true>
+			<select name="acces_type_id">
+				<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@acces_types}}">
+					<F3:check if="{{@REQUEST.acces_type_id == @item.id}}">
+						<F3:true>
+							<option value="{{@item.id}}" selected>{{@item.libelle}}</option>
+						</F3:true>
+						<F3:false>
+							<option value="{{@item.id}}">{{@item.libelle}}</option>
+						</F3:false>
+					</F3:check>
+				</F3:repeat>
+			</select>
+	</F3:check></dd>
+	<dt><label for="individu">Individu</label></dt>
+	<dd><input type="text" name="individu" id="individu"
+		value="{{@REQUEST.individu}}" onkeypress="handleEnter(this, event)"
+		required /></dd>
+	<dd><input type="hidden" name="individu_id" id="individu_id"
+		value="{{@REQUEST.individu_id}}" /></dd>
+	<p />
+	<dd><input type="submit" name="submit" value="Valider" /></dd>
+</dl>
+</form>
+</fieldset>
+
+<F3:check if="{{@ajouter}}">
+	<F3:true>
+	<fieldset><legend>Groupe :</legend>  
+		<form name="acces" method="post" action="{{@PARAMS.0}}">
+		<dl>
+			<dt>Type d'accès</dt>
+			<dd><F3:check if="{{@acces_types}}">
+				<F3:true>
+					<select name="acces_type_id">
+						<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@acces_types}}">
+							<F3:check if="{{@REQUEST.acces_type_id == @item.id}}">
+								<F3:true>
+									<option value="{{@item.id}}" selected>{{@item.libelle}}</option>
+								</F3:true>
+								<F3:false>
+									<option value="{{@item.id}}">{{@item.libelle}}</option>
+								</F3:false>
+							</F3:check>
+						</F3:repeat>
+					</select>
+			</F3:check></dd>
+			<dt><label for="groupe_id">Type de groupe</label></dt>
+			<dd><select id = "type_groupe" name="type_groupe" onchange="change_type_groupe(this.options[this.selectedIndex].value)"
+			>
+				<option value="organisme">Organisme</option>
+				<option value="lieu">Lieu</option>
+				<option value="domaine">Domaine</option>
+			</select></dd>
+			<dt><label for="groupe_id">Groupe</label></dt>
+			<dd><input type="text" name="groupe" id="groupe"
+				value="" onkeypress="handleEnterGroupe(this, event)"
+				required /></dd>
+			<dd><input type="hidden" name="groupe_id" id="groupe_id"
+				value="" /></dd>
+			<p />
+			<dd><input type="submit" name="submit" value="Valider" /></dd>
+		</dl>
+		</form>
+	</F3:true>
+</F3:check>
+
+
+<script>
+	function handleEnter(inField, e) {
+		var charCode;
+
+		if (e && e.which) {
+			charCode = e.which;
+		} else if (window.event) {
+			e = window.event;
+			charCode = e.keyCode;
+		}
+
+		if (charCode != 13) {
+			onkeypress = "javascript:document.getElementById('individu_id').value = 0;"
+		}
+	}
+
+	function handleEnterGroupe(inField, e) {
+		var charCode;
+
+		if (e && e.which) {
+			charCode = e.which;
+		} else if (window.event) {
+			e = window.event;
+			charCode = e.keyCode;
+		}
+
+		if (charCode != 13) {
+			onkeypress = "javascript:document.getElementById('groupe_id').value = 0;"
+		}
+	}
+
+	function change_type_groupe(type){
+		$( "#groupe" ).autocomplete( "option", "source", "/ajax/groupe?type=" + type );
+		document.getElementById('groupe_id').value = 0;
+	}
+	
+
+	$(function() {
+		$("#individu").autocomplete( {
+			source : "/ajax/profils",
+			minLength : 3,
+			select : function(event, ui) {
+				document.getElementById('individu_id').value = ui.item.id;
+			}
+		});
+		
+
+		
+		$("#groupe").autocomplete( {
+			source : "/ajax/groupe?type=",
+			minLength : 3,
+			select : function(event, ui) {
+				document.getElementById('groupe_id').value = ui.item.id;
+			}
+		});
+
+		type_groupe = document.getElementById('type_groupe');
+		change_type_groupe(type_groupe.options[type_groupe.selectedIndex].value);
+	});
+</script>

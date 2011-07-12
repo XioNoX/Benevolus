@@ -1,0 +1,14 @@
+<h3>{{@pagetitle}}</h3>
+<form name="login" method="post" action="/connexion" >
+	<F3:check if="{{@message}}">
+		<F3:true><p class="fail">{{@message}}</p></F3:true>
+	</F3:check>
+	<dl>
+		<dt><label for="login">Email ou Numéro d'identifiant</label></dt>
+		<dd><input type="text" name="login" id="login" value="{{@REQUEST.login}}" required autofocus/></dd>
+		<dt><label for="password">Mot de passe</label></dt>
+		<dd><input type="password" name="password" id="password" required/></dd>
+		<dd><input type="submit" name="seconnecter" value="Se connecter"/></dd>
+	</dl>
+</form>
+</F3:check>

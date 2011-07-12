@@ -1,0 +1,43 @@
+<h3>{{@pagetitle}}</h3>
+<p>{{@description}}</p>
+<p>{{@lien_ajouter}}</p>
+<script type="text/javascript">
+$(function(){
+  var mygrid = jQuery("#list").jqGrid({
+   scroll: 1,
+    url:'{{@jquery_url_list}}',
+    datatype: 'json',
+    mtype: 'GET',
+    //width: '{{@jquery_largeur}}',
+    autowidth: true,
+    height: 400,
+    colNames:{{@jquery_col_names}},
+    colModel :{{@jquery_col_model}},
+    pager: '#pager',
+   // rowNum:20,
+   // rowList:[20,40,60],
+    sortname: 'id',
+    sortorder: 'desc',
+    viewrecords: true,
+    gridview : true,
+    multiselect: true,
+  editurl: "{{@jquery_url_edit2}}"
+  }); 
+jQuery("#list").jqGrid('filterToolbar');
+
+jQuery("#list").jqGrid('navGrid','#pager',{edit:false,add:false,del:true,search:false,refresh:false});
+
+function formateadorLink(cellvalue, options, rowObject) {
+    return "<a href={{@jquery_url_edit}}"+ cellvalue + ">" + cellvalue + "</a>";
+}
+
+
+}); 
+</script>
+
+<table id="list"></table> 
+<div id="pager"></div> 
+<div id="filter" style="margin-left:30%;display:none">recherche</div>
+
+
+

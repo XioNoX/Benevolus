@@ -1,0 +1,506 @@
+<h3>{{@pagetitle}}</h3>
+
+<F3:check if="{{@message}}">
+	<F3:true>
+		<p class="fail">{{@message}}</p>
+	</F3:true>
+</F3:check>
+
+
+<div id="organisme">
+	<div class="organisme_gauche">
+		<form name="organisme" method="post" action="{{@PARAMS.0}}">
+
+			<fieldset>
+				<legend>Organisme</legend>
+				<dl>
+					<dt>
+						<label for="libelle">Libelle</label>
+					</dt>
+					<dd>
+						<input type="text" name="libelle" id="libelle"
+							value="{{@REQUEST.libelle}}" required />
+					</dd>
+					<dt>
+						<label for="adresse1">Adresse 1</label>
+					</dt>
+					<dd>
+						<input type="text" name="adresse1" id="adresse1"
+							value="{{@REQUEST.adresse1}}" required />
+					</dd>
+					<dt>
+						<label for="adresse2">Adresse 2</label>
+					</dt>
+					<dd>
+						<input type="text" name="adresse2" id="adresse2"
+							value="{{@REQUEST.adresse2}}" />
+					</dd>
+					<dt>
+						<label for="ville">Ville (ou code postal)</label>
+					</dt>
+					<dd>
+						<input type="text" name="ville" id="ville"
+							value="{{@REQUEST.ville}}"
+							onkeypress="handleEnterVille(this, event)" required />
+					</dd>
+					<dd>
+						<input type="hidden" name="ville_id" id="ville_id"
+							value="{{@REQUEST.ville_id}}" />
+					</dd>
+
+					<dt>Type d'organisme</dt>
+					<dd>
+						<F3:check if="{{@types}}">
+							<F3:true>
+								<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@types}}">
+									<input type="radio" name="organisme_type_id" value="{{@item.id}}"
+										id="radio{{@item.id}}" required>
+									<label for="radio{{@item.id}}">{{@item.libelle}}</label>
+								</F3:repeat>
+						</F3:check>
+					</dd>
+
+					<F3:check if="{{@SESSION.acces_web >= @acces_operateur}}">
+						<F3:true>
+							<dt>Effectif maximum</dt>
+							<dd>
+								<input type="text" name="maximum" id="maximum"
+									value="{{@REQUEST.maximum}}" required />
+							</dd>
+				</dl>
+			</fieldset>
+
+			<fieldset>
+				<legend>Responsable :</legend>
+				<input type="text" name="responsable" id="responsable"
+					value="{{@REQUEST.responsable}}"
+					onkeypress="handleEnterResponsable(this, event)" required />
+				{{@infosResponsable}} <input type="hidden" name="responsable_id"
+					id="responsable_id" value="{{@REQUEST.responsable_id}}" />
+			</fieldset>
+			</F3:true>
+			</F3:check>
+			<input type="submit" name="submit" value="Valider" />
+		</form>
+
+	</div>
+
+	<F3:check if="{{@editer}}">
+		<F3:true>
+			<div class="organisme_droit">
+				<fieldset>
+					<legend>Statistiques</legend>
+					<ul>
+						<li>Nombre de bénévoles ayant travaillés :
+							{{@nb_travailles}}</li>
+						<li>Pas retirés de bracelets : {{@nb_absents}}</li>
+					</ul>
+				</fieldset>
+			</div>
+		</F3:true>
+	</F3:check>
+</div>
+
+<F3:check if="{{@editer}}">
+	<F3:true>
+		<div id="organisme_membres">
+			<div class="organisme_gauche">
+
+				<fieldset>
+					<legend>Membres ({{@nb_membres}}) :</legend>
+
+					<F3:check if="{{@nb_membres > 0}}">
+						<F3:true>
+								<div id="listeMembres">{{@listeMembres}}</div>
+								<a href="/organisme/imprimer/{{@REQUEST.id}}">Imprimer
+								la liste des membres</a> | <a
+								href="/organisme/imprimer/{{@REQUEST.id}}/adresse">Imprimer la
+								liste des membres (avec adresse)</a> | <a
+								href="/vacations/imprimer/organisme/{{@REQUEST.id}}">Imprimer
+								les convocations</a> | <a
+								href="#" onclick="supprimer_affectations()">Supprimer les affectations des membres</a>
+
+						</F3:true>
+						<F3:false>
+					Aucun membre dans l'organisme
+					</F3:false>
+					</F3:check>
+				</fieldset>
+			</div>
+			<div class="organisme_droit">
+				<fieldset>
+					<legend>Ajouter un membre :</legend>
+					<div id="div_prevedents">
+						<dl>
+							<dt>
+								<label for="precedents">Membres précédents</label>
+							</dt>
+							<dd>
+								<input type="text" name="precedents" id="precedents" value=""
+									placeholder="Prénom et Nom" autocomplete="off" /><a href="#"
+									onclick="pasDansListe()"> Pas dans la liste</a>
+							</dd>
+						</dl>
+					</div>
+
+					<div id="form_invitation">
+						<form name="invitation" action="null.php" method="post">
+							<dl>
+								<dt>
+									<label for="prenom_individu">Prénom</label>
+								</dt>
+								<dd>
+									<input type="text" name="prenom_individu" id="prenom_individu"
+										value="" placeholder="Prénom" required />
+								</dd>
+								<dt>
+									<label for="nom_individu">Nom</label>
+								</dt>
+								<dd>
+									<input type="text" name="nom_individu" id="nom_individu"
+										value="" placeholder="Nom" required />
+								</dd>
+								<dt>
+									<label for="nom_individu">Date de naissance
+										(20/01/1980)</label>
+								</dt>
+								<dd>
+									<input type="text" name="ddn_individu" id="ddn_individu"
+										value="" placeholder="20/01/1980" required />
+								</dd>
+								<dt>
+									<label for="email_individu">E-mail (facultatif)</label>
+								</dt>
+								<dd>
+									<input type="email" name="email_individu" id="email_individu"
+										value="" placeholder="exemple@email.fr" />
+								</dd>
+								<dd>
+									<input type="submit" id="ajouter" name="ajouter"
+										value="Ajouter" />
+								</dd>
+							</dl>
+						</form>
+					</div>
+
+
+					<ul id="listeAttente">
+						<F3:repeat value="{{@item}}" group="{{@listeAttente}}">
+							<F3:check if="{{@item.valide == 1}}">
+								<F3:false>
+									<li>{{@item.prenom}} {{@item.nom}} né(e) le
+										{{date('d/m/Y',strtotime(@item.date_naissance))}} invité(e) le
+										{{date('d/m/Y',strtotime(@item.date_invitation))}} en attente de
+										validation par l'équipe bénévoles du festival <a
+										id="{{@item.id}" class="supprimerInvitation" href="#">X</a>
+									</li>
+								</F3:false>
+								<F3:true>
+									<li>{{@item.prenom}} {{@item.nom}} né(e) le
+										{{date('d/m/Y',strtotime(@item.date_naissance))}} invité(e) le
+										{{date('d/m/Y',strtotime(@item.date_invitation))}} <a
+										id="{{@item.id}}" href="/inscription/{{@item.uuid}}">Créer le
+											compte</a> - <a id="{{@item.id}}" class="supprimerInvitation"
+										href="#">Supprimer</a>
+									</li>
+								</F3:true>
+							</F3:check>
+						</F3:repeat>
+					</ul>
+				</fieldset>
+			</div>
+		</div>
+	</F3:true>
+</F3:check>
+
+<div id="dialog_del" title="Supprimer ?">
+	<p>
+		<span class="ui-icon ui-icon-alert"
+			style="float: left; margin: 0 7px 20px 0;"></span>Supprimer ?
+	</p>
+</div>
+
+<div id="dialog_del_action" title="Supprimer ?">
+	<p>
+		<span class="ui-icon ui-icon-alert"
+			style="float: left; margin: 0 7px 20px 0;"></span>Supprimer ?
+	</p>
+</div>
+
+<div id="dialog_add" title="Ajouter ?">
+	<p>
+		<span class="ui-icon ui-icon-alert"
+			style="float: left; margin: 0 7px 20px 0;"></span>Ajouter cette
+		personne à l'organisme ?
+	</p>
+</div>
+
+<script>
+	form = document.getElementById("form_invitation");
+
+	function handleEnterVille(inField, e) {
+		var charCode;
+
+		if (e && e.which) {
+			charCode = e.which;
+		} else if (window.event) {
+			e = window.event;
+			charCode = e.keyCode;
+		}
+
+		if (charCode != 13) {
+			onkeypress = "javascript:document.getElementById('ville_id').value = 0;"
+		}
+	}
+
+	function handleEnterResponsable(inField, e) {
+		var charCode;
+
+		if (e && e.which) {
+			charCode = e.which;
+		} else if (window.event) {
+			e = window.event;
+			charCode = e.keyCode;
+		}
+
+		if (charCode != 13) {
+			onkeypress = "javascript:document.getElementById('responsable_id').value = 0;"
+		}
+	}
+
+	$(function() {
+		now = new Date();
+		$("#ddn_individu").datepicker(
+				{
+					defaultDate : "+1w",
+					firstDay : 1,
+					//minDate: new Date(now.getFullYear(), 1 - 1, 1),
+					yearRange : '1910:2011',
+					prevText : 'Précédent',
+					nextText : 'Suivant',
+					dateFormat : 'dd/mm/yy',
+					changeMonth : true,
+					numberOfMonths : 1,
+					dayNamesMin : [ 'Di', 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa' ],
+					monthNamesShort : [ 'Janvier', 'Février', 'Mars', 'Avril',
+							'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre',
+							'Octobre', 'Novembre', 'Décembre' ],
+					changeYear : true,
+					showOn : "button",
+					buttonImage : "/gui/images/gfx/calendar.gif",
+					buttonImageOnly : true
+				});
+	});
+
+	$(function() {
+		$("#ville").autocomplete({
+			source : "/ajax/ville",
+			minLength : 3,
+			select : function(event, ui) {
+				document.getElementById('ville_id').value = ui.item.id;
+			}
+		});
+	});
+	$(function() {
+		$("#responsable").autocomplete({
+			source : "/ajax/profils",
+			minLength : 3,
+			select : function(event, ui) {
+				document.getElementById('responsable_id').value = ui.item.id;
+			}
+		});
+	});
+
+	$("#dialog_del_action").dialog({
+		autoOpen : false,
+		modal : true,
+		buttons : {
+			"Supprimer" : function() {
+				//Exécution du script PHP avec Ajax  
+				$.get(url, {
+					action : action
+				}, function(data) {
+					if (data != "OK") {
+						alert(data);
+					}
+				});
+				$(this).dialog("close");
+			},
+			"Annuler" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+
+	function supprimer_affectations(){
+		url = '{{@PARAMS.0}}/ajax_action';
+		action = "supprimer_affectations";
+		$("#dialog_del_action").dialog("open");
+		return false;
+	}
+
+
+	$("#dialog_del").dialog({
+		autoOpen : false,
+		modal : true,
+		buttons : {
+			"Supprimer" : function() {
+
+				//Exécution du script PHP avec Ajax  
+				$.post(url, {
+					id : id_suppr
+				}, function(data) {
+					if (data == "OK") {
+						element.parent().eq(0).fadeOut("slow");
+					} else {
+						alert(data);
+					}
+				});
+				$(this).dialog("close");
+			},
+			"Annuler" : function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+
+	$("#dialog_add")
+			.dialog(
+					{
+						autoOpen : false,
+						modal : true,
+						buttons : {
+							"Ajouter" : function() {
+
+								//Exécution du script PHP avec Ajax  
+								$
+										.post(
+												'/organismes/editer/{{@PARAMS.id}}/ajouterMembre',
+												{
+													id : id_a_ajouter,
+													invitation : '0'
+												},
+												function(data) {
+													if (data == "OK") {
+														alert(label_a_ajouter
+																+ " ajoutée");
+														$("#listeMembre")
+																.prepend(
+																		"<li>"
+																				+ label_a_ajouter
+																				+ " <a href=\"/disponibilites/"+ id_a_ajouter +"/gerer\">Disponibilitées</a> - <a href=\"/vacations/imprimer/"+ id_a_ajouter +"\">Convocation</a> - <a id=\""+ id_a_ajouter +"\" class=\"supprimerMembre\"	href=\"#\">X</a></li>");
+
+													} else {
+														alert("Erreur : "
+																+ data);
+													}
+												});
+								$(this).dialog("close");
+							},
+							"Annuler" : function() {
+								$(this).dialog("close");
+							}
+						}
+					});
+
+	$(".supprimerMembre").live('click', function() {
+		element = $(this);
+		id_suppr = element.attr("id");
+		url = '{{@PARAMS.0}}/supprMembre';
+		$("#dialog_del").dialog("open");
+		return false;
+
+	});
+
+	$(".supprimerInvitation").live('click', function() {
+		element = $(this);
+		id_suppr = element.attr("id");
+		url = '{{@PARAMS.0}}/supprInvitation';
+		$("#dialog_del").dialog("open");
+		return false;
+
+	});
+
+	function pasDansListe() {
+		$(form).show();
+
+		var div_prevedents = document.getElementById('div_prevedents');
+		$(div_prevedents).hide();
+		return false;
+	}
+
+	$("#ajouter")
+			.click(
+					function() {
+						var email_individu = $("#email_individu").val();
+						var prenom_individu = $("#prenom_individu").val();
+						var nom_individu = $("#nom_individu").val();
+						var ddn_individu = $("#ddn_individu").val();
+						var emailRegExp = new RegExp('^.+@.+\..+$', 'i'); //TODO à améliorer 
+						if (!email_individu.match(emailRegExp)
+								&& email_individu != "") {
+							alert("Adresse email non valide");
+							return false;
+						} else if (prenom_individu == "") {
+							alert("Veuillez entrer un prénom");
+							return false;
+						} else if (nom_individu == "") {
+							alert("Veuillez entrer un nom");
+							return false;
+						} else if (ddn_individu == "") {
+							alert("Veuillez entrer une ddn");
+							return false;
+						}
+
+						var params = 'prenom=' + prenom_individu + '&nom='
+								+ nom_individu + '&date_naissance='
+								+ ddn_individu + '&email=' + email_individu;
+						$
+								.ajax({
+									type : "POST",
+									url : "{{@PARAMS.0}}/ajouterMembre",
+									data : params,
+									success : function(msg) {
+										if (msg == "OK") {
+											$("#listeAttente")
+													.prepend(
+															"<li>"
+																	+ prenom_individu
+																	+ ' '
+																	+ nom_individu
+																	+ ' '
+																	+ ddn_individu
+																	+ " en attente de validation par l'équipe bénévoles du festival <a id=\"" + email_individu + "\" class=\"supprimerMembre\"	href=\"#\">X</a></li>");
+											document
+													.getElementById('email_individu').value = "";
+											document
+													.getElementById('prenom_individu').value = "";
+											document
+													.getElementById('nom_individu').value = "";
+											document
+													.getElementById('ddn_individu').value = "";
+										} else
+											alert(msg);
+									}
+								});
+						return false;
+
+					});
+
+	window.onload = function() {
+		var tmp = "{{@REQUEST.organisme_type_id}}";
+		if (tmp != "")
+			document.getElementById('radio' + tmp).checked = true;
+	}
+	$(form).hide();
+
+	$("#precedents").autocomplete({
+		source : "/organisme/tous_membres/{{@PARAMS.id}}",
+		minLength : 3,
+		select : function(event, ui) {
+			id_a_ajouter = ui.item.id;
+			label_a_ajouter = ui.item.label;
+			$("#dialog_add").dialog("open");
+		}
+	});
+</script>

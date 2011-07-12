@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<rss version="2.0">
+	<channel>
+		<title>{@site}</title>
+		<link>/rss</link>
+		<description>{@site} - RSS Feed</description>
+		<F3:repeat index="{@item}" group="{@entries}">
+			<item>
+				<title>{@item.title}</title>
+				<link>/#{strtotime(@item.time)}</link>
+				<description>{substr(@item.entry,0,300)} ...</description>
+			</item>
+		</F3:repeat>
+	</channel>
+</rss>

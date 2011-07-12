@@ -1,0 +1,18 @@
+<h3>
+	<F3:check if="{{@SESSION.prenom}}">
+		<F3:true>Bienvenue {{ucfirst(@SESSION.prenom)}} !</F3:true>
+		<F3:false>{{@pagetitle}}</F3:false>
+	</F3:check>
+</h3>
+
+<F3:check if="{{@message}}">
+		<F3:true>
+			<p class="fail">{{@message}}</p>
+		</F3:true>
+</F3:check>
+
+<F3:check if="{{@message_dispos}}">
+		<F3:true>
+			<p class="fail">{{@message_dispos}}</p>
+		</F3:true>
+</F3:check>

@@ -1,0 +1,91 @@
+<h3>{{@pagetitle}}</h3>
+
+<F3:check
+	if="{{@message}}">
+	<F3:true>
+		<p class="fail">{{@message}}</p>
+	</F3:true>
+</F3:check>
+<F3:check
+	if="{{@succes}}">
+	<F3:true>
+		<p class="pass">{{@succes}}</p>
+	</F3:true>
+</F3:check>
+
+<form name="messages" method="post" action="{{@PARAMS.0}}">
+
+<dl>
+  
+   <F3:check if="{{@admin}}">
+  	<F3:true>
+  	<p><a href="/messages/envoyer">Personne</a> - <a href="/messages/envoyer/domaine">Domaine</a> - <a href="/messages/envoyer/lieu">Lieu</a> - <a href="/messages/envoyer/organisme">Organisme</a></p>
+	</F3:true>
+</F3:check>
+
+
+
+	<dt><label for="destinataires">Destinataire(s) - {{@type}}</label></dt>
+
+  <F3:check	if="{{@destinataire}}">
+	<F3:true>
+    <dd><p>{{@destinataire.libelle}}</p></dd>
+	  <dd><input type="hidden" name="destinataires_id" id="destinataires_id" value="{{@destinataire.id}}"/></dd>
+	</F3:true>
+	<F3:false>
+    <dd><input type="text" name="destinataires" id="destinataires" required /></dd>
+	  <dd><input type="hidden" name="destinataires_id" id="destinataires_id" /></dd>
+	</F3:false>
+</F3:check>
+	   <F3:check if="{{@admin}}">
+  	<F3:true>
+	<dt><label for="sms">Envoyer un SMS</label></dt>
+	<dd>  <input value="0" name="sms" id="sms_checkbox" type="checkbox" onclick="check_sms()"></dd>	</F3:true>
+</F3:check>
+
+	<dt><label for="sujet">Sujet</label></dt>
+	<dd><input type="text" name="sujet" id="sujet" size="40" required /></dd>
+	
+	<dt><label for="message">Message</label></dt>
+	<dd><textarea name="message" id="message" rows="10"  cols="50" ></textarea></dd>
+
+
+	<dd><input type="submit" name="submit" value="Envoyer" /></dd>
+</dl>
+</form>
+
+<script type="text/javascript">
+function check_sms() {
+  var sms_checkbox = document.getElementById('sms_checkbox');
+  var message_textbox = document.getElementById('message');
+  var sujet = document.getElementById('sujet');
+  if (sms_checkbox.checked == true){
+   message_textbox.disabled = true;
+   sujet.size=110;
+  var sujet = document.getElementById('sujet');
+  }
+  if (sms_checkbox.checked == false){
+   message_textbox.disabled = false;
+   sujet.size=40;
+
+  }
+
+}
+
+$(function(){
+var url = '/ajax/destinataires_messages' ;
+var type_destinataire = document.getElementById('type_destinataire');
+var t = new $.TextboxList('#destinataires', {unique: true, plugins: {
+        autocomplete: {
+					minLength: 3,
+          onlyFromValues: true,
+					queryRemote: true,
+					remote: {url: url, extraParams: {type_destinataire: '{{@type}}' }, loadPlaceholder: 'Veuillez patienter...'},
+          placeholder: 'Commencez à écrire pour obtenir des suggestions'
+				}
+        }});
+
+$('#message').elastic();
+});
+
+</script>

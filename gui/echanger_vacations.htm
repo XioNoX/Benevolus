@@ -1,0 +1,207 @@
+
+
+<h3>{{@pagetitle}}</h3>
+
+<p class="success" id="succes"></p>
+
+<div>
+	<table id="liste_personnes1"></table>
+	<div id="pager_liste_personnes1"></div>
+	
+<table id="liste_personnes2"></table>
+	<div id="pager_liste_personnes2"></div>
+</div>
+
+<input type="submit" onclick="voir_affectations()" value="Voir les affectations" name="voir_affectations">
+
+<div id="informationsIndividus1"></div>
+<div id="informationsIndividus2"></div>
+
+<div id="dialog_ech" title="Echnager ?">
+</div>
+
+<script type="text/javascript">
+
+individu1_id = '';
+individu2_id = '';
+
+individu1_nom = '';
+individu2_nom = '';
+
+affectations_individu1 = '';
+affectations_individu2 = '';
+
+
+$("#dialog_ech").dialog({
+          autoOpen: false,
+          modal: true,
+		      buttons : {
+		        "Echanger" : function() {
+
+            //Exécution du script PHP avec Ajax  
+            $.post('/vacations/echanger', { 
+                individu1_id:individu1_id,individu2_id:individu2_id,affectations_individu1:affectations_individu1,affectations_individu2:affectations_individu2
+            }, function(data){
+               if(data == "OK"){	
+            	   location.reload(true);
+               }else
+               {
+                 alert("Erreur :" + data);
+               }
+               $("#liste_personnes1").trigger("reloadGrid");  
+               $("#liste_personnes2").trigger("reloadGrid");
+               individu1_id = '';
+               individu2_id = '';
+               affectations_individu1 = '';
+               affectations_individu2 = '';
+            });
+                $(this).dialog("close");
+		        },
+		        "Annuler" : function() {
+		        	affectations_individu1 = '';
+		        	affectations_individu2 = '';
+		          $(this).dialog("close");
+		        }
+		      }
+		    });
+
+
+$(function(){
+  mygrid_personnes1 = jQuery("#liste_personnes1").jqGrid({
+    scroll: true,
+    rowTotal :8000,
+    loadonce: true,
+    url: '/ajax/profils_vacations',
+    datatype: 'json',
+    mtype: 'GET',
+    width: '315',
+    //autowidth: true,
+    height: 300,
+    colNames:['id','Prénom', 'Nom', 'Organisme', 'Vac.'],
+    colModel :[
+                {name:'id', index:'id', width:25, formatter: formateadorLink}, 
+                {name:'prenom', index:'prenom', width:30}, 
+                {name:'nom', index:'nom', width:30}, 
+                {name:'organisme', index:'organisme', width:50, stype:'select', editoptions:{value:"{{@organismes}}"}},
+                {name:'vacations', index:'vacations', width:20} 
+              ],
+    pager: '#pager_liste_personnes1',
+   // rowNum:20,
+   // rowList:[20,40,60],
+    sortname: 'id',
+    sortorder: 'desc',
+    viewrecords: true,
+    gridComplete: function() { $('#liste_personnes1 .jqgrow').mouseover(function(e) { var rowId = $(this).attr('id'); afficherInfosIndividus1(rowId); }); },
+    gridview : true,
+    multiselect: true,
+    onSelectRow: function(id){ 
+       individu1_id = id; 
+       individu1_nom = $('#liste_personnes1').getCell(id, 'prenom') + ' ' + $('#liste_personnes1').getCell(id, 'nom');
+       }
+  }); 
+  jQuery("#liste_personnes1").jqGrid('filterToolbar');
+
+  jQuery("#liste_personnes1").jqGrid('navGrid','#pager_liste_personnes1',{edit:false,add:false,del:false,search:false,refresh:false});
+
+  function formateadorLink(cellvalue, options, rowObject) {
+      return "<a href=/profil/"+ cellvalue + ">" + cellvalue + "</a>";
+	}
+  mygrid_personnes2 = jQuery("#liste_personnes2").jqGrid({
+    scroll: true,
+    rowTotal :8000,
+    loadonce: true,
+    url: '/ajax/profils_vacations',
+    datatype: 'json',
+    mtype: 'GET',
+    width: '315',
+    //autowidth: true,
+    height: 300,
+    colNames:['id','Prénom', 'Nom', 'Organisme', 'Vac.'],
+    colModel :[
+                {name:'id', index:'id', width:25, formatter: formateadorLink}, 
+                {name:'prenom', index:'prenom', width:30}, 
+                {name:'nom', index:'nom', width:30}, 
+                {name:'organisme', index:'organisme', width:50, stype:'select', editoptions:{value:"{{@organismes}}"}},
+                {name:'vacations', index:'vacations', width:20} 
+              ],
+    pager: '#pager_liste_personnes2',
+   // rowNum:20,
+   // rowList:[20,40,60],
+    sortname: 'id',
+    sortorder: 'desc',
+    viewrecords: true,
+    gridComplete: function() { $('#liste_personnes2 .jqgrow').mouseover(function(e) { var rowId = $(this).attr('id'); afficherInfosIndividus2(rowId); }); },
+    gridview : true,
+    multiselect: true,
+    onSelectRow: function(id){
+    individu2_id = id;
+    individu2_nom = $('#liste_personnes2').getCell(id, 'prenom') + ' ' + $('#liste_personnes2').getCell(id, 'nom');
+    }
+  }); 
+  jQuery("#liste_personnes2").jqGrid('filterToolbar');
+
+  jQuery("#liste_personnes2").jqGrid('navGrid','#pager_liste_personnes2',{edit:false,add:false,del:false,search:false,refresh:false});
+
+
+}); 
+
+function afficherInfosIndividus1(id){
+            //Exécution du script PHP avec Ajax  
+            $.get('/ajax/profils_vacations', { 
+                action:'afficher',id:id
+            }, function(data){
+			          var message = '<div class="info">' + data + '</p>';
+		          	document.getElementById("informationsIndividus1").innerHTML = message;	
+            });
+}
+
+function afficherInfosIndividus2(id){
+            //Exécution du script PHP avec Ajax  
+            $.get('/ajax/profils_vacations', { 
+                action:'afficher',id:id
+            }, function(data){
+			          var message = '<div class="info">' + data + '</p>';
+		          	document.getElementById("informationsIndividus2").innerHTML = message;	
+            });
+}
+
+
+function voir_affectations()
+{        
+        if((individu1_id == 0) || (individu2_id == 0))
+          alert("Veuillez selectionner 2 individus");
+        else
+        {
+        	 $.post('/vacations/echanger', { 
+                 individu1_id:individu1_id,individu2_id:individu2_id
+             }, function(data){
+            	 $.facybox(data);
+             });
+			
+        }
+} 
+
+function echanger()
+{
+	var nb_vacations_ind1 = document.getElementsByName("affectations_individu1").length;
+	for(i=0;i<nb_vacations_ind1;i++)
+	  {
+	    if(document.getElementsByName("affectations_individu1")[i].checked == true){
+	    	affectations_individu1 += document.getElementsByName("affectations_individu1")[i].value;
+	    }
+	  } 
+
+	var nb_vacations_ind2 = document.getElementsByName("affectations_individu2").length;
+	for(i=0;i<nb_vacations_ind2;i++)
+	  {
+	    if(document.getElementsByName("affectations_individu2")[i].checked == true){
+	    	affectations_individu2 += document.getElementsByName("affectations_individu2")[i].value;
+	    }
+	  } 
+    document.getElementById("dialog_ech").innerHTML = "<p>Vacations de " + individu1_nom + " avec " +  individu2_nom + ".</p>";
+    $.facybox.close();
+	$("#dialog_ech").dialog("open");
+	
+}
+
+</script>

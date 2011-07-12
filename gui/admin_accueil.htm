@@ -1,0 +1,87 @@
+<h3>
+	<F3:check if="{{@SESSION.prenom}}">
+		<F3:true>Admin !</F3:true>
+		<F3:false>{{@pagetitle}}</F3:false>
+	</F3:check>
+</h3>
+
+<F3:check if="{{@message}}">
+		<F3:true>
+			<p class="fail">{{@message}}</p>
+		</F3:true>
+</F3:check>
+ <fieldset>
+    <legend>Valider les nouveaux individus :</legend>
+<button id="refreshButton">Actualiser la liste</button>
+<table id="listNonActifs"></table>
+ </fieldset>
+
+
+<script>
+	$(document).ready(function() {
+		$('button#refreshButton', 'body').button().click(refreshList);
+		refreshList();
+	});
+	
+	function refreshList() {
+		$.ajax({
+			url: "/profils/invitations/attente",
+			dataType: 'json',
+			context: document.body,
+			success: function(result) {
+				$('#listNonActifs', 'body').empty();
+        $('#listNonActifs', 'body').append("<tr><th>Prenom</th><th>Nom</th><th>Date naiss.</th><th width='130px'>Organisme</th><th>Adresse</th><th>Téléphone(s)</th><th width='30px'>Statut</th><th>Action</th></tr>");
+        if(result != ''){
+				  $.each(result, insertNonActif);
+				  //$('#listNonActifs button', 'body').button().click(activer);
+          $('.btnActiver').button().click(activer);
+          $('.btnSupprimer').button().click(supprimer);
+          $('.btnActiverFusionner').button().click(activerFusionner);
+        }
+			}
+		});		
+	}
+	
+	function insertNonActif(index, value) {
+		//Aucun doublon trouvé
+		if (value.doublon == 0)
+    {
+			$('#listNonActifs', 'body').append("<tr class='recherche_doublon'><td>" + value.prenom + "</td><td>" + value.nom + "</td><td>" + value.date_naissance + "</td><td>" + value.libelle + "</td><td></td><td></td><td></td><td><button class='btnActiver' ind_id=" + value.id + ">valider</button><button style='float:right' class='btnSupprimer' ind_id=" + value.id + ">refuser</button></td></tr>");	
+    }
+		//Doublons potentiels
+		else
+		{
+			if (value.doublon == 0)
+				$('#listNonActifs', 'body').append("<tr class='recherche_doublon'><td>" + value.prenom + "</td><td>" + value.nom + "</td><td>" + value.date_naissance + "</td><td>" + value.libelle + "</td><td>" + value.statut + "</td><td><button style='float:right' class='btnSupprimer' ind_id=" + value.id + ">refuser</button></td></tr>");		
+			else
+				$('#listNonActifs', 'body').append("<tr class='doublon'><td>" + value.prenom + "</td><td>" + value.nom + "</td><td>" + value.date_naissance + "</td><td>" + value.libelle + "</td><td>" + value.adresse1 + ' <br>' + value.ville + "</td><td>" + value.telephone_fixe + ' <br>' + value.telephone_portable + "</td><td>" + value.statut + "</td><td><button class='btnActiverFusionner' double_id=" + value.double + "  ind_id=" + value.id + ">fusionner</button></td></tr>");			
+		}
+	}
+	
+	function activer(src) {
+		$.ajax({
+			url: ("/profils/invitations/activer/" + $(this).attr("ind_id")),
+			dataType: 'json',
+			context: document.body,
+			success: refreshList
+		});
+	}
+	function supprimer(src) {
+		$.ajax({
+			url: ("/profils/invitations/supprimer/" + $(this).attr("ind_id")),
+			dataType: 'json',
+			context: document.body,
+			success: refreshList
+		});
+	}
+	function activerFusionner(src) {
+		$.ajax({
+			url: "/profils/invitations/fusionner",
+      data: "id="+ $(this).attr("ind_id") + "&double_id="+ $(this).attr("double_id"),
+			dataType: 'json',
+			context: document.body,
+			success: refreshList
+		}); 
+	}
+	
+</script>

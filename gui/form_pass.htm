@@ -1,0 +1,13 @@
+<h3>{{@pagetitle}}</h3>
+<form name="login" method="post" action="/oublie" >
+	<F3:check if="{{@error}}">
+		<F3:true><p class="fail">{{@error}}</p></F3:true>
+	</F3:check>
+	<dl>
+		<dt><label for="login">Email ou Numéro de téléphone portable</label></dt>
+		<dd><input type="text" name="login" id="login" value="{{@REQUEST.login}}" required autofocus/></dd>
+
+		<dd><input type="submit" name="nouveau" value="Demander un nouveau mot de passe"/></dd>
+	</dl>
+</form>
+</F3:check>

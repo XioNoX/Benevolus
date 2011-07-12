@@ -1,0 +1,50 @@
+<h3>{{@pagetitle}}</h3>
+
+<F3:check if="{{@organisme}}">
+	<F3:true>
+		<F3:check if="{{@REQUEST.responsable == 1}}">
+			<F3:true>
+				<p class="warn">
+					Vous êtes responsable de cet organisme. Vous pouvez le gérer en <a href="/organismes/editer/{{@REQUEST.id}}">cliquant ici</a> <br/>
+					Pour gérer les recommandations, <a href="/organismes/{{@REQUEST.id}}/recommandations">cliquez ici</a><br/>
+					Pour envoyer un message à tous les membre, <a href="/messages/envoyer/organisme/{{@REQUEST.id}}">cliquez ici</a>
+				</p>
+			</F3:true>
+		</F3:check>
+		
+		<div id="profil_gauche">
+			<div class="info" style="margin-bottom:15px;">
+				<b>Adresse :</b><br/>
+				{{@REQUEST.adresse1}} {{@REQUEST.adresse2}}<br/>
+				{{@REQUEST.cp}} {{@REQUEST.ville}}<br/><br/>
+				<b>Responsable : </b><br/>
+				<a href="/profil/{{@REQUEST.responsable_id}}">{{@REQUEST.responsable_nom}}</a><br/>
+        <br/><b>Type : </b>{{@type}}<br/>
+        
+        			<b>Effectif max. : </b> {{@effmax}}<br><br>
+        			<b>Heures travaillées : </b> {{@heures_travaillees}}
+        
+			</div>
+			<F3:check if="{{@REQUEST.membres}}">
+				<F3:true>
+					{{@REQUEST.nb_membres}} membres :
+					<ul>
+						<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@REQUEST.membres}}">
+							<li><a href="/profil/{{@item.id}}">{{@item.nom}} {{@item.prenom}}</a></li>
+							
+						</F3:repeat>
+					</ul>
+				</F3:true>
+
+			</F3:check>
+		</div>
+		
+		<div id="profil_droit">
+			Vous êtes membre de cet organisme
+		</div>
+		
+	</F3:true>
+	<F3:false>
+		<p class="fail">Vous n'êtes membre d'aucun organisme</p>
+	</F3:false>
+</F3:check>
