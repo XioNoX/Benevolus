@@ -1001,7 +1001,7 @@ class Ajax {
 		$start = $limit*$page - $limit; // do not put $limit*($page - 1)
 		if ($start<0) $start = 0;
 		DB::sql("SELECT vacations.id, vacations.libelle, vacations.heure_debut, vacations.heure_fin, vacations.nombre_minimum, vacations.nombre_maximum, jour, CONCAT(prenom, ' ', nom) AS prenomnom FROM vacations, individus, festivals_jours WHERE vacations.festival_jour_id=festivals_jours.id AND festivals_jours.festival_id=$festival_id AND vacations.responsable_id=individus.id AND lieu_id=$id".$wh." ORDER BY $sidx $sord LIMIT $start, $limit;");
-
+		$reponse = new stdClass();
 		$reponse->page = $page;
 		$reponse->total = $total_pages;
 		$reponse->records = $count;

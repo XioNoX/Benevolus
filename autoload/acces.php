@@ -18,7 +18,7 @@ class Acces {
 	      {name:'libelle', index:'libelle', width:100},
 	      {name:'individu', index:'individu', width:100}
 	    ]");
-		F3::set('template','liste_generique1');
+		F3::set('template','liste_generique2');
 		F3::call('outils::generer');
 	}
 
