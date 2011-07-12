@@ -69,7 +69,6 @@ $("#dialog_ech").dialog({
 $(function(){
   mygrid_personnes1 = jQuery("#liste_personnes1").jqGrid({
     scroll: true,
-    rowTotal :8000,
     loadonce: true,
     url: '/ajax/profils_vacations',
     datatype: 'json',
@@ -106,9 +105,8 @@ $(function(){
   function formateadorLink(cellvalue, options, rowObject) {
       return "<a href=/profil/"+ cellvalue + ">" + cellvalue + "</a>";
 	}
-  mygrid_personnes2 = jQuery("#liste_personnes2").jqGrid({
+  mygrid_personnes1 = jQuery("#liste_personnes2").jqGrid({
     scroll: true,
-    rowTotal :8000,
     loadonce: true,
     url: '/ajax/profils_vacations',
     datatype: 'json',

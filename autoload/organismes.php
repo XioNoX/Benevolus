@@ -698,7 +698,7 @@ class Organismes {
 						//Titres des colonnes
 						$header=array('#','ID','Nom','Prenom','CP','Commune','Tel. fixe','Tel. port.');
 						//Largeur des colonnes
-						$w=array(8,16,50,50,16,70,30,30);
+						$w=array(8,16,35,35,16,60,30,30);
 						//Titre des colonnes SQL
 						$header2=array('rank','id','nom_individu','prenom','cp','nom_ville','telephone_fixe','telephone_portable');
 						//DonnÃ©es SQL
@@ -710,7 +710,7 @@ class Organismes {
 						//Titres des colonnes
 						$header=array('#','ID','Nom','Prenom','Adresse','Adresse2','CP','Commune','Tel. fixe','Tel. port.');
 						//Largeur des colonnes
-						$w=array(8,12,35,25,45,45,16,40,22,22);
+						$w=array(8,10,35,25,45,45,16,40,22,22);
 						//Titre des colonnes SQL
 						$header2=array('rank','id','nom_individu','prenom','adresse1','adresse2','cp','nom_ville','telephone_fixe','telephone_portable');
 						//DonnÃ©es SQL

@@ -43,7 +43,7 @@ class Vacations {
 			$result = F3::get('DB')->result;
 			$nombre_maximum = $result[0]['nombre_maximum'];
 			$compteur = 0;
-
+				
 
 			foreach( $liste_individus as $id_individus) {
 				if(!is_numeric($id_individus)) exit("Individu pas numérique");
@@ -290,10 +290,10 @@ class Vacations {
 
 		if (!$vacation->dry()) {
 			$vacation->copyTo('REQUEST');
-
+				
 			F3::set('REQUEST.heure_debut', outils::date_sql_timepicker(F3::get('REQUEST.heure_debut')));
 			F3::set('REQUEST.heure_fin', outils::date_sql_timepicker(F3::get('REQUEST.heure_fin')));
-
+				
 			if ($vacation->responsable_id != 0) {
 				$responsable_id = F3::get('REQUEST.responsable_id');
 				$individu=new Axon('individus');
@@ -303,7 +303,7 @@ class Vacations {
 
 			$membres = DB::sql("SELECT individus.id, individus.prenom, individus.nom, organismes.libelle FROM vacations, individus, affectations, organismes, historique_organismes WHERE vacations.id = $vacation_id AND historique_organismes.festival_id = $festival_id AND historique_organismes.individu_id = individus.id AND organismes.id = historique_organismes.organisme_id AND individus.id = affectations.individu_id AND affectations.vacation_id = vacations.id ORDER BY individus.nom;");
 			if (count($membres) > 0)
-			F3::set('membres', $membres);
+				F3::set('membres', $membres);
 
 			F3::call('vacations::recuperation_lieux');
 			F3::call('outils::recuperation_festivals_jours');
@@ -475,7 +475,7 @@ class Vacations {
 			$affectations_individu1 = explode(' ', $affectations_individu1);
 			$affectations_individu2 = explode(' ', $affectations_individu2);
 
-
+				
 			foreach( $affectations_individu1 as $affectation_id) { 			// Pour chaques vacations de $vacations_individu1, on remplace individu1 par individu2
 				if(is_numeric($affectation_id)){
 					$affectation=new Axon('affectations');
@@ -484,7 +484,7 @@ class Vacations {
 					$affectation->save();
 				}
 			}
-
+				
 			foreach( $affectations_individu2 as $affectation_id) { 			// Idem avec individu2
 				if(is_numeric($affectation_id)){
 					$affectation=new Axon('affectations');
@@ -498,12 +498,12 @@ class Vacations {
 			echo "OK";
 
 		}else{ //Sinon afficher le formulaire de selection de vacations
-
+				
 			$individu = new Axon('individus');
 			$individu->load("id=$individu1_id");
-
+				
 			$sortie = '<fieldset><legend>'. $individu->prenom . ' '. $individu->nom . ' :</legend>';
-
+				
 			DB::sql("SELECT affectations.id, festivals_jours.jour, vacations.heure_debut, vacations.heure_fin, lieux.libelle FROM `lieux`, `affectations`, `vacations`, `festivals_jours` WHERE vacations.lieu_id = lieux.id AND affectations.vacation_id = vacations.id AND festivals_jours.id = vacations.festival_jour_id AND festivals_jours.festival_id = $festival_id AND affectations.individu_id = $individu1_id;");
 			foreach (F3::get('DB')->result as $row) {
 				$sortie .= '<input type="checkbox" name="affectations_individu1" value=" '. $row['id'] .'" /> '. $row['jour'].$row['heure_debut'].$row['heure_fin'].$row['libelle']. "<br />";
@@ -511,17 +511,17 @@ class Vacations {
 
 			$individu = new Axon('individus');
 			$individu->load("id=$individu2_id");
-
+				
 			$sortie .= '</fieldset><fieldset><legend>'. $individu->prenom . ' '. $individu->nom . ' :</legend>';
-
+				
 			DB::sql("SELECT affectations.id, festivals_jours.jour, vacations.heure_debut, vacations.heure_fin, lieux.libelle FROM `lieux`, `affectations`, `vacations`, `festivals_jours` WHERE vacations.lieu_id = lieux.id AND affectations.vacation_id = vacations.id AND festivals_jours.id = vacations.festival_jour_id AND festivals_jours.festival_id = $festival_id AND affectations.individu_id = $individu2_id;");
 			foreach (F3::get('DB')->result as $row) {
 				$sortie .= '<input type="checkbox" name="affectations_individu2" value=" '. $row['id'] .'" /> '. $row['jour'] . ' ' . $row['heure_debut'] . ' ' . $row['heure_fin'] . ' ' . $row['libelle']. "<br />";
 			}
-
-
+				
+				
 			$sortie .= '</fieldset><input type="submit" onclick="echanger()" name="echanger" value="Échanger" />';
-
+				
 			echo($sortie);
 		}
 	}
@@ -541,16 +541,21 @@ class Vacations {
 		Outils::http401();
 	}
 
-	static function imprimer_emargement_vacation() {
-		F3::call('outils::verif_individu');
+static function imprimer_emargement_vacation() {
+	F3::call('outils::verif_individu');
 
-		ini_set('max_execution_time', '0');
+	ini_set('max_execution_time', '0');
 
-		$vacation_id = F3::get('PARAMS.id');
-		if(is_numeric($vacation_id))
+	$vacation_id = F3::get('PARAMS.id');
+	if(is_numeric($vacation_id))
+	{
+		$vacation = new Axon('vacations');
+		$vacation->load("id=$vacation_id");
+
+		if(!$vacation->dry())
 		{
-			$vacation = new Axon('vacations');
-			$vacation->load("id=$vacation_id");
+			require_once 'lib/pdf.php';
+			require_once 'lib/barcode-ean13.php';
 
 			$festival_id = F3::get('SESSION.festival_id');
 			$festival = new Axon('festivals');
@@ -573,17 +578,30 @@ class Vacations {
 			$responsable = DB::sql("SELECT i.photo, i.nom, i.prenom, i.adresse1, i.adresse2, vi.cp, vi.nom FROM individus AS i, villes AS vi, vacations AS va WHERE va.id=$vacation_id AND va.responsable_id=i.id AND i.ville_id=vi.id");
 			if (count($responsable)>0)
 			{
-				require_once 'lib/pdf.php';
-				require_once 'lib/barcode-ean13.php';
+				$pdf->SetFont('Arial','B',14);
+				$pdf->Cell(25);
+				$pdf->Cell(0,6,"Responsable :",0,1, 'L');
 
-				$festival_id = F3::get('SESSION.festival_id');
-				$festival = new Axon('festivals');
-				$festival->load("id=$festival_id");
+				$pdf->SetFont('Arial','',14);
 
-				$lieu = F3::sql("SELECT l.libelle FROM lieux AS l, vacations AS v WHERE v.id=$vacation_id AND v.lieu_id=l.id");
+				if ($responsable[0]['photo'] != NULL)
+				$pdf->Image("uploads/photos/". $responsable[0]['photo'] ,15,49,null,30);
 
-				//Instanciation de la classe dérivée
-				$pdf=new PDF_EAN13('L');
+				$pdf->Cell(25);
+				$pdf->Cell(0,6,$responsable[0]['nom'] . " " . $responsable[0]['prenom'] ,0,1, 'L');
+					
+				if ($responsable[0]['adresse1'] != NULL)
+				{
+					$pdf->Cell(25);
+					$pdf->Cell(0,6,$responsable[0]['adresse1'],0,1, 'L');
+					//$x_line = $pdf->GetStringWidth($responsable[0]['adresse1']);
+					$x_line = $pdf->GetStringWidth($responsable[0]['adresse1']);
+				}
+				if ($responsable[0]['adresse2'] != NULL)
+				{
+					$pdf->Cell(25);
+					$pdf->Cell(0,6,$responsable[0]['adresse2'],0,1, 'L');
+				}
 
 				$pdf->Cell(25);
 				$pdf->Cell(0,6,$responsable[0]['cp'] . " " . $responsable[0]['nom'],0,1, 'L');
@@ -663,11 +681,7 @@ static function imprimer_emargement_lieu() {
 				
 				$pdf->header = true;
 				$pdf->barcode = $vacation_id;
-				$pdf->footer = true;
-					
-				$pdf->SetMargins(5, 5);
-				$pdf->titre = "Emargement " . $lieu[0]['libelle'] . " " . $festival->annee;
-				$pdf->AliasNbPages();
+				
 				$pdf->AddPage();
 					
 				$responsable = DB::sql("SELECT i.photo, i.nom, i.prenom, i.adresse1, i.adresse2, vi.cp, vi.nom FROM individus AS i, villes AS vi, vacations AS va WHERE va.id=$vacation_id AND va.responsable_id=i.id AND i.ville_id=vi.id");
@@ -676,21 +690,19 @@ static function imprimer_emargement_lieu() {
 					$pdf->SetFont('Arial','B',14);
 					$pdf->Cell(25);
 					$pdf->Cell(0,6,"Responsable :",0,1, 'L');
-
+						
 					$pdf->SetFont('Arial','',14);
-
+						
 					if ($responsable[0]['photo'] != NULL)
 					$pdf->Image("uploads/photos/". $responsable[0]['photo'] ,15,49,null,30);
 
 					$pdf->Cell(25);
 					$pdf->Cell(0,6,$responsable[0]['nom'] . " " . $responsable[0]['prenom'] ,0,1, 'L');
-						
+
 					if ($responsable[0]['adresse1'] != NULL)
 					{
 						$pdf->Cell(25);
 						$pdf->Cell(0,6,$responsable[0]['adresse1'],0,1, 'L');
-						//$x_line = $pdf->GetStringWidth($responsable[0]['adresse1']);
-						$x_line = $pdf->GetStringWidth($responsable[0]['adresse1']);
 					}
 					if ($responsable[0]['adresse2'] != NULL)
 					{
@@ -701,92 +713,99 @@ static function imprimer_emargement_lieu() {
 					$pdf->Cell(25);
 					$pdf->Cell(0,6,$responsable[0]['cp'] . " " . $responsable[0]['nom'],0,1, 'L');
 				}
-
-				$pdf->Line(140,40,140,68);
 					
+				$pdf->Line(140,40,140,65);
+				
 				//Données SQL
 				$data = DB::sql("SELECT i.id AS id, i.nom AS nom_individu, i.prenom, o.libelle, '' AS debut, '' AS signature1, '' AS fin, '' AS signature2 FROM vacations AS va, individus AS i, affectations AS a, organismes AS o, historique_organismes AS ho WHERE va.id = $vacation_id AND ho.festival_id = $festival_id AND ho.individu_id = i.id AND o.id = ho.organisme_id AND i.id = a.individu_id AND a.vacation_id = va.id;");
-
+				
 				//Décalage à droite
 				$pdf->SetY(40);
-
+					
 				$pdf->Cell(150);
-				$pdf->Cell(0,6,$vacation->libelle . " (ID:" . $vacation_id . ")" ,0,1, 'L');
+				$pdf->Cell(0,6,$vacation["libelle"] . " (ID:" . $vacation_id . ")" ,0,1, 'L');
 				$pdf->Cell(150);
-				$pdf->Cell(0,6,"Heure debut : " . outils::date_sql_timepicker($vacation->heure_debut),0,1, 'L');
+				$pdf->Cell(0,6,"Heure debut : " . outils::date_sql_timepicker($vacation["heure_debut"]),0,1, 'L');
 				$pdf->Cell(150);
-				$pdf->Cell(0,6,"Heure fin : " . outils::date_sql_timepicker($vacation->heure_fin),0,1, 'L');
+				$pdf->Cell(0,6,"Heure fin : " . outils::date_sql_timepicker($vacation["heure_fin"]),0,1, 'L');
 				$pdf->Cell(150);
 				$pdf->Cell(0,6,"# personnes : " . count($data),0,1, 'L');
 
-				$pdf->SetY(70);
+				$pdf->Ln(8);
 
 				//Titres des colonnes
 				$header=array('ID','Nom','Prenom','Association','Debut','Signature','Fin','Signature');
 				//Largeur des colonnes
-				$w=array(16,40,40,72,20,30,20,30);
+				$w=array(16,40,40,90,20,30,20,30);
 				//Titre des colonnes SQL
 				$header2=array('id','nom_individu','prenom','libelle','debut','signature1','fin','signature2');
 				//Grande taille pour signature
 				$pdf->cellule_haute = true;
 				//Affichage des données
 				$pdf->FancyTable($header,$data,$header2,$w);
-
-				$pdf->Output("Emargement-".$vacation_id."-".$festival->annee.".pdf", 'D');
-
 			}
-			else
-			Outils::http401();
+
+			$pdf->Output("Emargement-".$vacation_id."-".$festival->annee.".pdf", 'D');
+
 		}
 		else
 		Outils::http401();
 	}
+	else
+	Outils::http401();
+}
 
-	static function imprimer_emargement_lieu() {
-		F3::call('outils::verif_admin');
+static function imprimer_emargement_domaine() {
+	F3::call('outils::verif_admin');
 
-		ini_set('max_execution_time', '0');
+	ini_set('max_execution_time', '0');
+		
+	$domaine_id = F3::get('PARAMS.id');
+	if(is_numeric($domaine_id))
+	{
+		$domaine = new Axon('domaines');
+		$domaine->load("id=$domaine_id");
 
-		$lieu_id = F3::get('PARAMS.id');
-		if(is_numeric($lieu_id))
+		if(!$domaine->dry())
 		{
-			$lieu = new Axon('lieux');
-			$lieu->load("id=$lieu_id");
+			require_once 'lib/pdf.php';
+			require_once 'lib/barcode-ean13.php';
 
-			if(!$lieu->dry())
-			{
-				require_once 'lib/pdf.php';
-				require_once 'lib/barcode-ean13.php';
+			$festival_id = F3::get('SESSION.festival_id');
+			$festival = new Axon('festivals');
+			$festival->load("id=$festival_id");
 
-				$festival_id = F3::get('SESSION.festival_id');
-				$festival = new Axon('festivals');
-				$festival->load("id=$festival_id");
+			//Instanciation de la classe dérivée
+			$pdf=new PDF_EAN13('L');
 
-				//Instanciation de la classe dérivée
-				$pdf=new PDF_EAN13('L');
+			$pdf->SetMargins(5, 5);
 
 			$lieux = DB::sql("SELECT * FROM lieux WHERE domaine_id=$domaine_id");
 
+			foreach ($lieux as $lieu) {	
+				$pdf->titre = "Emargement " . $lieu['libelle'] . " " . $festival->annee;
+
+				$lieu_id = $lieu["id"];
 				//Lister les vacations du lieu
 				$vacations = DB::sql("SELECT * FROM vacations WHERE lieu_id=$lieu_id");
 
 				foreach ($vacations as $vacation) {
 					$vacation_id = $vacation["id"];
-
+					
 					$pdf->header = true;
 					$pdf->barcode = $vacation_id;
-
+				
 					$pdf->AddPage();
-						
+
 					$responsable = DB::sql("SELECT i.photo, i.nom, i.prenom, i.adresse1, i.adresse2, vi.cp, vi.nom FROM individus AS i, villes AS vi, vacations AS va WHERE va.id=$vacation_id AND va.responsable_id=i.id AND i.ville_id=vi.id");
 					if (count($responsable)>0)
 					{
 						$pdf->SetFont('Arial','B',14);
 						$pdf->Cell(25);
 						$pdf->Cell(0,6,"Responsable :",0,1, 'L');
-
+							
 						$pdf->SetFont('Arial','',14);
-
+							
 						if ($responsable[0]['photo'] != NULL)
 						$pdf->Image("uploads/photos/". $responsable[0]['photo'] ,15,49,null,30);
 
@@ -807,15 +826,15 @@ static function imprimer_emargement_lieu() {
 						$pdf->Cell(25);
 						$pdf->Cell(0,6,$responsable[0]['cp'] . " " . $responsable[0]['nom'],0,1, 'L');
 					}
-						
-					$pdf->Line(140,40,140,65);
 
+					$pdf->Line(140,40,140,65);
+					
 					//Données SQL
 					$data = DB::sql("SELECT i.id AS id, i.nom AS nom_individu, i.prenom, o.libelle, '' AS debut, '' AS signature1, '' AS fin, '' AS signature2 FROM vacations AS va, individus AS i, affectations AS a, organismes AS o, historique_organismes AS ho WHERE va.id = $vacation_id AND ho.festival_id = $festival_id AND ho.individu_id = i.id AND o.id = ho.organisme_id AND i.id = a.individu_id AND a.vacation_id = va.id;");
-
+					
 					//Décalage à droite
 					$pdf->SetY(40);
-						
+
 					$pdf->Cell(150);
 					$pdf->Cell(0,6,$vacation["libelle"] . " (ID:" . $vacation_id . ")" ,0,1, 'L');
 					$pdf->Cell(150);
@@ -825,7 +844,7 @@ static function imprimer_emargement_lieu() {
 					$pdf->Cell(150);
 					$pdf->Cell(0,6,"# personnes : " . count($data),0,1, 'L');
 
-					$pdf->Ln(8);
+					$pdf->Ln(4);
 
 					//Titres des colonnes
 					$header=array('ID','Nom','Prenom','Association','Debut','Signature','Fin','Signature');
@@ -838,21 +857,24 @@ static function imprimer_emargement_lieu() {
 					//Affichage des données
 					$pdf->FancyTable($header,$data,$header2,$w);
 				}
-
-				$pdf->Output("Emargement-".$vacation_id."-".$festival->annee.".pdf", 'D');
-
 			}
-			else
-			Outils::http401();
+
+			$pdf->Output("Emargement-".$vacation_id."-".$festival->annee.".pdf", 'D');
+
 		}
 		else
 		Outils::http401();
 	}
+	else
+	Outils::http401();
+}
 
-	static function imprimer_emargement_domaine() {
-		F3::call('outils::verif_admin');
+//Impression pour 2012
+/*static function imprimer() {
+ F3::call('outils::verif_individu');
 
-		ini_set('max_execution_time', '0');
+ $festival_id = F3::get('SESSION.festival_id');
+ $individu_id = F3::get('SESSION.id');
 
  if(is_numeric(F3::get('PARAMS.id'))){
  $id = F3::get('PARAMS.id');
@@ -868,36 +890,48 @@ static function imprimer_emargement_lieu() {
  $individu_id = F3::get('SESSION.id');
  }
 
-			if(!$domaine->dry())
-			{
-				require_once 'lib/pdf.php';
-				require_once 'lib/barcode-ean13.php';
+ require_once 'lib/pdf.php';
+ require_once 'lib/barcode-ean13.php';
 
-				$festival_id = F3::get('SESSION.festival_id');
-				$festival = new Axon('festivals');
-				$festival->load("id=$festival_id");
+ //Instanciation de la classe dérivée
+ $pdf=new PDF_EAN13();
+ $pdf->SetMargins(15, 15);
 
-				//Instanciation de la classe dérivée
-				$pdf=new PDF_EAN13('L');
+ $pdf->header = true;
+ $pdf->footer = true;
 
-				$pdf->SetMargins(5, 5);
+ $festival = new Axon('festivals');
+ $festival->load("id=$festival_id");
+ $pdf->titre = "Convocation " . $festival->annee . "..............................";
 
-				$lieux = F3::sql("SELECT * FROM lieux WHERE domaine_id=$domaine_id");
+ $pdf->AliasNbPages();
+ $pdf->AddPage();
+ $pdf->SetFont('Arial','',15);
+ $pdf->Ln(20);
 
-				foreach ($lieux as $lieu) {
-					$pdf->titre = "Emargement " . $lieu['libelle'] . " " . $festival->annee;
+ $individu = new Axon('individus');
+ $individu->load("id=$individu_id");
 
-					$lieu_id = $lieu["id"];
-					//Lister les vacations du lieu
-					$vacations = F3::sql("SELECT * FROM vacations WHERE lieu_id=$lieu_id");
+ //$individu_id += 111111111111;
+ $pdf->EAN13(110,70,$individu_id + 000000000000);
 
-					foreach ($vacations as $vacation) {
-						$vacation_id = $vacation["id"];
-							
-						$pdf->header = true;
-						$pdf->barcode = $vacation_id;
+ //Nom & prenom de l'inidividu
+ $pdf->Cell(0,6,$individu->nom . " " . $individu->prenom,0,1,'R');
+ //Adresse1
+ $pdf->Cell(0,6,$individu->adresse1,0,1, 'R');
+ //Adresse2
+ if ($individu->adresse2 != NULL)
+ $pdf->Cell(0,6,$individu->adresse2,0,1, 'R');
+ //Ville
+ if (($individu->ville_id != NULL) && ($individu->ville_id != 0) )
+ {
+ $individu_ville_id = $individu->ville_id;
+ $ville_individu = new Axon('villes');
+ $ville_individu->load("id=$individu_ville_id");
+ $pdf->Cell(0,6,$ville_individu->cp . " " . $ville_individu->nom,0,1, 'R');
+ }
 
-						$pdf->AddPage();
+ $pdf->Ln(10);
 
  //Organisme
  $organisme = DB::sql("SELECT o.libelle, o.adresse1, o.adresse2, o.ville_id FROM organismes AS o, historique_organismes AS ho WHERE ho.individu_id=$individu_id AND ho.festival_id=$festival_id AND ho.organisme_id=o.id");
@@ -908,23 +942,23 @@ static function imprimer_emargement_lieu() {
  if ($organisme[0]['adresse1'] != NULL)
  $pdf->Cell(0,6,$organisme[0]['adresse1'],0,1, 'L');
 
-							$pdf->Cell(25);
-							$pdf->Cell(0,6,$responsable[0]['nom'] . " " . $responsable[0]['prenom'] ,0,1, 'L');
+ if ($organisme[0]['adresse2'] != NULL)
+ $pdf->Cell(0,6,$organisme[0]['adresse2'],0,1, 'L');
 
-							if ($responsable[0]['adresse1'] != NULL)
-							{
-								$pdf->Cell(25);
-								$pdf->Cell(0,6,$responsable[0]['adresse1'],0,1, 'L');
-							}
-							if ($responsable[0]['adresse2'] != NULL)
-							{
-								$pdf->Cell(25);
-								$pdf->Cell(0,6,$responsable[0]['adresse2'],0,1, 'L');
-							}
+ if (($organisme[0]['ville_id'] != NULL) && ($organisme[0]['ville_id'] != 0) )
+ {
+ $organisme_ville_id = $organisme[0]['ville_id'];
+ //echo $organisme_ville_id;
+ $ville_organisme = new Axon('villes');
+ $ville_organisme->load("id=$organisme_ville_id");
+ $pdf->Cell(0,6,$ville_organisme->cp . " " . $ville_organisme->nom,0,1, 'L');
+ }
+ }
 
-							$pdf->Cell(25);
-							$pdf->Cell(0,6,$responsable[0]['cp'] . " " . $responsable[0]['nom'],0,1, 'L');
-						}
+ $pdf->Ln(30);
+ $pdf->SetFont('Arial','',12);
+ $pdf->Cell(0,5,"Vos affectations : ",0,1, 'L');
+ $pdf->Ln(10);
 
  //Affectations
  $affectations = DB::sql("SELECT a.id, fj.jour, v.heure_debut, v.heure_fin, l.libelle, v.lieu_id FROM lieux AS l, affectations AS a, vacations AS v, festivals_jours AS fj WHERE v.lieu_id = l.id AND a.vacation_id = v.id AND fj.id = v.festival_jour_id AND fj.festival_id = $festival_id AND a.individu_id = $individu_id;");
@@ -934,36 +968,25 @@ static function imprimer_emargement_lieu() {
  $lieu_id = $valeur["lieu_id"];
  $responsable = DB::sql("SELECT i.prenom, i.nom FROM individus AS i, responsables_lieux AS rl WHERE rl.lieu_id=$lieu_id AND rl.festival_id=$festival_id AND i.id=rl.individu_id");
 
-						$pdf->Ln(4);
+ $affectation = outils::date_sql_fr($valeur["jour"]) . " : " . $valeur["libelle"] . " de " . $valeur["heure_debut"] . " à " . $valeur["heure_fin"];
+ if (count($responsable) > 0)
+ $affectation .= ", demander " . $responsable[0]['prenom'] . " " . $responsable[0]['nom'];
 
-						//Titres des colonnes
-						$header=array('ID','Nom','Prenom','Association','Debut','Signature','Fin','Signature');
-						//Largeur des colonnes
-						$w=array(16,40,40,90,20,30,20,30);
-						//Titre des colonnes SQL
-						$header2=array('id','nom_individu','prenom','libelle','debut','signature1','fin','signature2');
-						//Grande taille pour signature
-						$pdf->cellule_haute = true;
-						//Affichage des données
-						$pdf->FancyTable($header,$data,$header2,$w);
-					}
-				}
+ $pdf->Cell(0,5,$affectation,0,1);
+ }
 
-				$pdf->Output("Emargement-".$vacation_id."-".$festival->annee.".pdf", 'D');
+ //$pdf->Output();
+ $pdf->Output("Affectations-".$individu_id."-".$festival->annee.".pdf", 'D');
+ }*/
 
-			}
-			else
-			Outils::http401();
-		}
-		else
-		Outils::http401();
-	}
-
-	//Impression pour 2012
-	/*static function imprimer() {
+static function imprimer_vacations_individu() {
 	F3::call('outils::verif_individu');
 
 	$festival_id = F3::get('SESSION.festival_id');
+
+	$festival = new Axon('festivals');
+	$festival->load("id=$festival_id");
+
 	$individu_id = F3::get('SESSION.id');
 
 	if(is_numeric(F3::get('PARAMS.id'))){
@@ -976,8 +999,8 @@ static function imprimer_emargement_lieu() {
 	}
 	else
 	{
-	F3::call('outils::verif_individu');
-	$individu_id = F3::get('SESSION.id');
+		F3::call('outils::verif_individu');
+		$individu_id = F3::get('SESSION.id');
 	}
 
 	require_once 'lib/pdf.php';
@@ -987,85 +1010,19 @@ static function imprimer_emargement_lieu() {
 	$pdf=new PDF_EAN13();
 	$pdf->SetMargins(15, 15);
 
-	$pdf->header = true;
-	$pdf->footer = true;
-
-	$festival = new Axon('festivals');
-	$festival->load("id=$festival_id");
-	$pdf->titre = "Convocation " . $festival->annee . "..............................";
-
-	$pdf->AliasNbPages();
-	$pdf->AddPage();
-	$pdf->SetFont('Arial','',15);
-	$pdf->Ln(20);
-
-	$individu = new Axon('individus');
-	$individu->load("id=$individu_id");
-
-	//$individu_id += 111111111111;
-	$pdf->EAN13(110,70,$individu_id + 000000000000);
-
-	//Nom & prenom de l'inidividu
-	$pdf->Cell(0,6,$individu->nom . " " . $individu->prenom,0,1,'R');
-	//Adresse1
-	$pdf->Cell(0,6,$individu->adresse1,0,1, 'R');
-	//Adresse2
-	if ($individu->adresse2 != NULL)
-	$pdf->Cell(0,6,$individu->adresse2,0,1, 'R');
-	//Ville
-	if (($individu->ville_id != NULL) && ($individu->ville_id != 0) )
-	{
-	$individu_ville_id = $individu->ville_id;
-	$ville_individu = new Axon('villes');
-	$ville_individu->load("id=$individu_ville_id");
-	$pdf->Cell(0,6,$ville_individu->cp . " " . $ville_individu->nom,0,1, 'R');
-	}
-
-	$pdf->Ln(10);
-
-	//Organisme
-	$organisme = F3::sql("SELECT o.libelle, o.adresse1, o.adresse2, o.ville_id FROM organismes AS o, historique_organismes AS ho WHERE ho.individu_id=$individu_id AND ho.festival_id=$festival_id AND ho.organisme_id=o.id");
-	if (count($organisme)>0)
-	{
-	$pdf->Cell(0,6,"Organisme : ",0,1, 'L');
-	$pdf->Cell(0,6,$organisme[0]['libelle'],0,1, 'L');
-	if ($organisme[0]['adresse1'] != NULL)
-	$pdf->Cell(0,6,$organisme[0]['adresse1'],0,1, 'L');
-
-	if ($organisme[0]['adresse2'] != NULL)
-	$pdf->Cell(0,6,$organisme[0]['adresse2'],0,1, 'L');
-
-	if (($organisme[0]['ville_id'] != NULL) && ($organisme[0]['ville_id'] != 0) )
-	{
-	$organisme_ville_id = $organisme[0]['ville_id'];
-	//echo $organisme_ville_id;
-	$ville_organisme = new Axon('villes');
-	$ville_organisme->load("id=$organisme_ville_id");
-	$pdf->Cell(0,6,$ville_organisme->cp . " " . $ville_organisme->nom,0,1, 'L');
-	}
-	}
-
-	$pdf->Ln(30);
-	$pdf->SetFont('Arial','',12);
-	$pdf->Cell(0,5,"Vos affectations : ",0,1, 'L');
-	$pdf->Ln(10);
 
 	//Affectations
 	$affectations = DB::sql("SELECT fj.jour, v.heure_debut, v.heure_fin, l.libelle FROM lieux AS l, affectations AS a, vacations AS v, festivals_jours AS fj WHERE v.lieu_id = l.id AND a.vacation_id = v.id AND fj.id = v.festival_jour_id AND fj.festival_id = $festival_id AND a.individu_id = $individu_id ORDER BY fj.jour, v.heure_debut;");
 	if (count($affectations)>0)
 	{
-	$lieu_id = $valeur["lieu_id"];
-	$responsable = F3::sql("SELECT i.prenom, i.nom FROM individus AS i, responsables_lieux AS rl WHERE rl.lieu_id=$lieu_id AND rl.festival_id=$festival_id AND i.id=rl.individu_id");
+		$pdf->AddPage();
+		$pdf->SetFont('Arial','',15);
 
-	$affectation = outils::date_sql_fr($valeur["jour"]) . " : " . $valeur["libelle"] . " de " . $valeur["heure_debut"] . " à " . $valeur["heure_fin"];
-	if (count($responsable) > 0)
-	$affectation .= ", demander " . $responsable[0]['prenom'] . " " . $responsable[0]['nom'];
+		$pdf->EAN13(116,30,$individu_id + 000000000000);
 
 		$individu = DB::sql("SELECT i.nom AS i_nom, i.prenom, i.adresse1, i.adresse2, v.cp, v.nom AS v_nom FROM individus AS i, villes AS v WHERE i.ville_id = v.id AND i.id=$individu_id");
 
-	//$pdf->Output();
-	$pdf->Output("Affectations-".$individu_id."-".$festival->annee.".pdf", 'D');
-	}*/
+		$pdf->SetY(55);
 
 		//Organisme
 		$organisme = DB::sql("SELECT o.id, o.libelle FROM organismes AS o, historique_organismes AS ho WHERE ho.individu_id=$individu_id AND ho.festival_id=$festival_id AND ho.organisme_id=o.id");
@@ -1078,114 +1035,66 @@ static function imprimer_emargement_lieu() {
 			if (count($o_responsable))
 			$o_infos .= "\n" . "Contact: " . $o_responsable[0]['nom'] . " " . $o_responsable[0]['prenom'];
 
-		$festival = new Axon('festivals');
-		$festival->load("id=$festival_id");
-
-		$individu_id = F3::get('SESSION.id');
-
-		if(is_numeric(F3::get('PARAMS.id'))){
-			$id = F3::get('PARAMS.id');
-			F3::sql("SELECT h2.individu_id FROM `historique_organismes` as h1, `historique_organismes` as h2 WHERE h1.individu_id = $id AND h1.festival_id = $festival_id AND h1.organisme_id = h2.organisme_id AND h2.responsable=1 AND h1.festival_id=h2.festival_id;");
-			if ((F3::get('DB.result.0.individu_id') == $individu_id) || outils::est_operateur()){
-				$individu_id = $id;
-			}else
-			outils::http401();
+			$pdf->MultiCell(0, 6, $o_infos, 0, 'L');
 		}
-		else
-		{
-			F3::call('outils::verif_individu');
-			$individu_id = F3::get('SESSION.id');
-		}
+			
+		$pdf->SetY(55);
 
-		require_once 'lib/pdf.php';
-		require_once 'lib/barcode-ean13.php';
+		$pdf->AddFont('ocraextended');
+		$pdf->SetFont('ocraextended');
 
-		//Instanciation de la classe dérivée
-		$pdf=new PDF_EAN13();
-		$pdf->SetMargins(15, 15);
+		//echo $individu[0]['prenom'];
+		$i_adresse = $individu[0]["i_nom"] . " " .   $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
+		if ($individu[0]['adresse2'] != NULL)
+		$i_adresse .= $individu[0]['adresse2'];
+		$i_adresse .= $individu[0]['cp'] . " " . $individu[0]['v_nom'];
 
+		$pdf->Cell(100);
+		$pdf->MultiCell(0, 6, $i_adresse, 0, 'L');
+
+		$pdf->SetY(140);
+		$pdf->SetFont('Arial','',12);
 
 		//Affectations
-		$affectations = F3::sql("SELECT fj.jour, v.heure_debut, v.heure_fin, l.libelle FROM lieux AS l, affectations AS a, vacations AS v, festivals_jours AS fj WHERE v.lieu_id = l.id AND a.vacation_id = v.id AND fj.id = v.festival_jour_id AND fj.festival_id = $festival_id AND a.individu_id = $individu_id ORDER BY fj.jour, v.heure_debut;");
-		if (count($affectations)>0)
+		foreach($affectations as $cle=>$valeur)
 		{
-			$pdf->AddPage();
-			$pdf->SetFont('Arial','',15);
-
-			$pdf->EAN13(116,30,$individu_id + 000000000000);
-
-			$individu = F3::sql("SELECT i.nom AS i_nom, i.prenom, i.adresse1, i.adresse2, v.cp, v.nom AS v_nom FROM individus AS i, villes AS v WHERE i.ville_id = v.id AND i.id=$individu_id");
-
-			$pdf->SetY(55);
-
-			//Organisme
-			$organisme = F3::sql("SELECT o.id, o.libelle FROM organismes AS o, historique_organismes AS ho WHERE ho.individu_id=$individu_id AND ho.festival_id=$festival_id AND ho.organisme_id=o.id");
-			if (count($organisme)>0)
-			{
-				$o_infos = $organisme[0]['libelle'] . "\n" . "n° " . $organisme[0]['id'];
-
-				$organisme_id = $organisme[0]['id'];
-				$o_responsable = F3::sql("SELECT i.prenom, i.nom FROM individus AS i, historique_organismes AS ho WHERE ho.individu_id=i.id AND ho.responsable=1 AND ho.organisme_id=$organisme_id");
-				if (count($o_responsable))
-				$o_infos .= "\n" . "Contact: " . $o_responsable[0]['nom'] . " " . $o_responsable[0]['prenom'];
-
-				$pdf->MultiCell(0, 6, $o_infos, 0, 'L');
-			}
-				
-			$pdf->SetY(55);
-
-			$pdf->AddFont('ocraextended');
-			$pdf->SetFont('ocraextended');
-
-			//echo $individu[0]['prenom'];
-			$i_adresse = $individu[0]["i_nom"] . " " .   $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
-			if ($individu[0]['adresse2'] != NULL)
-			$i_adresse .= $individu[0]['adresse2'] . "\n";
-			$i_adresse .= $individu[0]['cp'] . " " . $individu[0]['v_nom'];
-
-			$pdf->Cell(100);
-			$pdf->MultiCell(0, 6, $i_adresse, 0, 'L');
-
-			$pdf->SetY(140);
-			$pdf->SetFont('Arial','',12);
-
-			//Affectations
-			foreach($affectations as $cle=>$valeur)
-			{
-				$affectation = outils::date_sql_fr($valeur["jour"]) . " : " . $valeur["libelle"] . " de " . $valeur["heure_debut"] . " à " . $valeur["heure_fin"];
-				$pdf->Cell(0,5,$affectation,0,1);
-			}
+			$affectation = outils::date_sql_fr($valeur["jour"]) . " : " . $valeur["libelle"] . " de " . $valeur["heure_debut"] . " à " . $valeur["heure_fin"];
+			$pdf->Cell(0,5,$affectation,0,1);
 		}
-		$pdf->Output("Affectations-".$individu_id."-".$festival->annee.".pdf", 'D');
 	}
+	$pdf->Output("Affectations-".$individu_id."-".$festival->annee.".pdf", 'D');
+}
 
-	static function imprimer_vacations_organisme() {
-		F3::call('outils::verif_admin');
+static function imprimer_vacations_organisme() {
+	F3::call('outils::verif_admin');
 
-		ini_set('max_execution_time', '0');
+	ini_set('max_execution_time', '0');
+		
+	$organisme_id = F3::get('PARAMS.id');
 
-		$organisme_id = F3::get('PARAMS.id');
+	if(is_numeric($organisme_id))
+	{
+		$organisme = new Axon('organismes');
+		$organisme->load("id=$organisme_id");
 
-		if(is_numeric($organisme_id))
+		if(!$organisme->dry())
 		{
-			$organisme = new Axon('organismes');
-			$organisme->load("id=$organisme_id");
+			require_once 'lib/pdf.php';
+			require_once 'lib/barcode-ean13.php';
 
-			if(!$organisme->dry())
-			{
-				require_once 'lib/pdf.php';
-				require_once 'lib/barcode-ean13.php';
+			//Instanciation de la classe dérivée
+			$pdf=new PDF_EAN13();
+			$pdf->SetMargins(5, 5);
 
-				//Instanciation de la classe dérivée
-				$pdf=new PDF_EAN13();
-				$pdf->SetMargins(5, 5);
+			$festival_id = F3::get('SESSION.festival_id');
 
-				$festival_id = F3::get('SESSION.festival_id');
+			$festival = new Axon('festivals');
+			$festival->load("id=$festival_id");
 
-				$festival = new Axon('festivals');
-				$festival->load("id=$festival_id");
+			$individus = Organismes::membres_organisme($organisme_id, $festival_id);
 
-				$individus = Organismes::membres_organisme($organisme_id, $festival_id);
+			foreach ($individus as $individu) {
+				$individu_id = $individu["id"];
 
 				//Affectations
 				$affectations = DB::sql("SELECT fj.jour, v.heure_debut, v.heure_fin, l.libelle FROM lieux AS l, affectations AS a, vacations AS v, festivals_jours AS fj WHERE v.lieu_id = l.id AND a.vacation_id = v.id AND fj.id = v.festival_jour_id AND fj.festival_id = $festival_id AND a.individu_id = $individu_id ORDER BY fj.jour, v.heure_debut;");
@@ -1194,16 +1103,11 @@ static function imprimer_emargement_lieu() {
 					$pdf->AddPage();
 					$pdf->SetFont('Arial','',15);
 
-					//Affectations
-					$affectations = F3::sql("SELECT fj.jour, v.heure_debut, v.heure_fin, l.libelle FROM lieux AS l, affectations AS a, vacations AS v, festivals_jours AS fj WHERE v.lieu_id = l.id AND a.vacation_id = v.id AND fj.id = v.festival_jour_id AND fj.festival_id = $festival_id AND a.individu_id = $individu_id ORDER BY fj.jour, v.heure_debut;");
-					if (count($affectations)>0)
-					{
-						$pdf->AddPage();
-						$pdf->SetFont('Arial','',15);
+					$pdf->EAN13(116,30,$individu_id + 000000000000);
 
 					$individu = DB::sql("SELECT i.nom AS i_nom, i.prenom, i.adresse1, i.adresse2, v.cp, v.nom AS v_nom FROM individus AS i, villes AS v WHERE i.ville_id = v.id AND i.id=$individu_id");
 
-						$individu = F3::sql("SELECT i.nom AS i_nom, i.prenom, i.adresse1, i.adresse2, v.cp, v.nom AS v_nom FROM individus AS i, villes AS v WHERE i.ville_id = v.id AND i.id=$individu_id");
+					$pdf->SetY(55);
 
 					//Organisme
 					$organisme = DB::sql("SELECT o.id, o.libelle FROM organismes AS o, historique_organismes AS ho WHERE ho.individu_id=$individu_id AND ho.festival_id=$festival_id AND ho.organisme_id=o.id");
@@ -1216,75 +1120,73 @@ static function imprimer_emargement_lieu() {
 						if (count($o_responsable))
 						$o_infos .= "\n" . "Contact: " . $o_responsable[0]['nom'] . " " . $o_responsable[0]['prenom'];
 
-							$organisme_id = $organisme[0]['id'];
-							$o_responsable = F3::sql("SELECT i.prenom, i.nom FROM individus AS i, historique_organismes AS ho WHERE ho.individu_id=i.id AND ho.responsable=1 AND ho.organisme_id=$organisme_id");
-							if (count($o_responsable))
-							$o_infos .= "\n" . "Contact: " . $o_responsable[0]['nom'] . " " . $o_responsable[0]['prenom'];
+						$pdf->MultiCell(0, 6, $o_infos, 0, 'L');
+					}
 
-							$pdf->MultiCell(0, 6, $o_infos, 0, 'L');
-						}
+					$pdf->SetY(55);
 
-						$pdf->SetY(55);
+					$i_adresse = $individu[0]["i_nom"] . " " . $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
+					if ($individu[0]['adresse2'] != NULL)
+					$i_adresse .= $individu[0]['adresse2'];
+					$i_adresse .= $individu[0]['cp'] . " " . $individu[0]['v_nom'];
 
-						$i_adresse = $individu[0]["i_nom"] . " " . $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
-						if ($individu[0]['adresse2'] != NULL)
-						$i_adresse .= $individu[0]['adresse2'] . "\n";
-						$i_adresse .= $individu[0]['cp'] . " " . $individu[0]['v_nom'];
+					$pdf->Cell(100);
+						
+					$pdf->AddFont('ocraextended');
+					$pdf->SetFont('ocraextended');
 
-						$pdf->Cell(100);
+					$pdf->MultiCell(0, 6, $i_adresse, 0, 'L');
 
-						$pdf->AddFont('ocraextended');
-						$pdf->SetFont('ocraextended');
+					$pdf->SetY(140);
+					$pdf->SetFont('Arial','',12);
 
-						$pdf->MultiCell(0, 6, $i_adresse, 0, 'L');
-
-						$pdf->SetY(140);
-						$pdf->SetFont('Arial','',12);
-
-						//Affectations
-						foreach($affectations as $cle=>$valeur)
-						{
-							$affectation = outils::date_sql_fr($valeur["jour"]) . " : " . $valeur["libelle"] . " de " . $valeur["heure_debut"] . " à " . $valeur["heure_fin"];
-							$pdf->Cell(0,5,$affectation,0,1);
-						}
+					//Affectations
+					foreach($affectations as $cle=>$valeur)
+					{
+						$affectation = outils::date_sql_fr($valeur["jour"]) . " : " . $valeur["libelle"] . " de " . $valeur["heure_debut"] . " à " . $valeur["heure_fin"];
+						$pdf->Cell(0,5,$affectation,0,1);
 					}
 				}
-				$pdf->Output("Affectations-organisme-".$organisme_id."-".$festival->annee.".pdf", 'D');
 			}
-			else
-			Outils::http401();
+			$pdf->Output("Affectations-organisme-".$organisme_id."-".$festival->annee.".pdf", 'D');
 		}
 		else
 		Outils::http401();
 	}
+	else
+	Outils::http401();
+}
 
-	static function imprimer_vacations_lieu() {
-		F3::call('outils::verif_admin');
+static function imprimer_vacations_lieu() {
+	F3::call('outils::verif_admin');
 
-		ini_set('max_execution_time', '0');
+	ini_set('max_execution_time', '0');
+		
+	$lieu_id = F3::get('PARAMS.id');
 
-		$lieu_id = F3::get('PARAMS.id');
+	if(is_numeric($lieu_id))
+	{
+		$lieu = new Axon('lieux');
+		$lieu->load("id=$lieu_id");
 
-		if(is_numeric($lieu_id))
+		if(!$lieu->dry())
 		{
-			$lieu = new Axon('lieux');
-			$lieu->load("id=$lieu_id");
+			require_once 'lib/pdf.php';
+			require_once 'lib/barcode-ean13.php';
 
-			if(!$lieu->dry())
-			{
-				require_once 'lib/pdf.php';
-				require_once 'lib/barcode-ean13.php';
+			//Instanciation de la classe dérivée
+			$pdf=new PDF_EAN13();
+			$pdf->SetMargins(5, 5);
 
-				//Instanciation de la classe dérivée
-				$pdf=new PDF_EAN13();
-				$pdf->SetMargins(5, 5);
+			$festival_id = F3::get('SESSION.festival_id');
 
-				$festival_id = F3::get('SESSION.festival_id');
+			$festival = new Axon('festivals');
+			$festival->load("id=$festival_id");
 
-				$festival = new Axon('festivals');
-				$festival->load("id=$festival_id");
+			$individus = Lieux::membres_lieu($lieu_id, $festival_id);
 
-				$individus = Lieux::membres_lieu($lieu_id, $festival_id);
+			foreach ($individus as $individu) {
+				$individu_id = $individu["id"];
 
 				//Affectations
 				$affectations = DB::sql("SELECT fj.jour, v.heure_debut, v.heure_fin, l.libelle FROM lieux AS l, affectations AS a, vacations AS v, festivals_jours AS fj WHERE v.lieu_id = l.id AND a.vacation_id = v.id AND fj.id = v.festival_jour_id AND fj.festival_id = $festival_id AND a.individu_id = $individu_id ORDER BY fj.jour, v.heure_debut;");
@@ -1293,16 +1195,11 @@ static function imprimer_emargement_lieu() {
 					$pdf->AddPage();
 					$pdf->SetFont('Arial','',15);
 
-					//Affectations
-					$affectations = F3::sql("SELECT fj.jour, v.heure_debut, v.heure_fin, l.libelle FROM lieux AS l, affectations AS a, vacations AS v, festivals_jours AS fj WHERE v.lieu_id = l.id AND a.vacation_id = v.id AND fj.id = v.festival_jour_id AND fj.festival_id = $festival_id AND a.individu_id = $individu_id ORDER BY fj.jour, v.heure_debut;");
-					if (count($affectations)>0)
-					{
-						$pdf->AddPage();
-						$pdf->SetFont('Arial','',15);
+					$pdf->EAN13(116,30,$individu_id + 000000000000);
 
 					$individu = DB::sql("SELECT i.nom AS i_nom, i.prenom, i.adresse1, i.adresse2, v.cp, v.nom AS v_nom FROM individus AS i, villes AS v WHERE i.ville_id = v.id AND i.id=$individu_id");
 
-						$individu = F3::sql("SELECT i.nom AS i_nom, i.prenom, i.adresse1, i.adresse2, v.cp, v.nom AS v_nom FROM individus AS i, villes AS v WHERE i.ville_id = v.id AND i.id=$individu_id");
+					$pdf->SetY(55);
 
 					//Organisme
 					$organisme = DB::sql("SELECT o.id, o.libelle FROM organismes AS o, historique_organismes AS ho WHERE ho.individu_id=$individu_id AND ho.festival_id=$festival_id AND ho.organisme_id=o.id");
@@ -1315,74 +1212,72 @@ static function imprimer_emargement_lieu() {
 						if (count($o_responsable))
 						$o_infos .= "\n" . "Contact: " . $o_responsable[0]['nom'] . " " . $o_responsable[0]['prenom'];
 
-							$organisme_id = $organisme[0]['id'];
-							$o_responsable = F3::sql("SELECT i.prenom, i.nom FROM individus AS i, historique_organismes AS ho WHERE ho.individu_id=i.id AND ho.responsable=1 AND ho.organisme_id=$organisme_id");
-							if (count($o_responsable))
-							$o_infos .= "\n" . "Contact: " . $o_responsable[0]['nom'] . " " . $o_responsable[0]['prenom'];
+						$pdf->MultiCell(0, 6, $o_infos, 0, 'L');
+					}
 
-							$pdf->MultiCell(0, 6, $o_infos, 0, 'L');
-						}
+					$pdf->SetY(55);
+						
+					$pdf->AddFont('ocraextended');
+					$pdf->SetFont('ocraextended');
 
-						$pdf->SetY(55);
+					$i_adresse = $individu[0]["i_nom"] . " " . $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
+					if ($individu[0]['adresse2'] != NULL)
+					$i_adresse .= $individu[0]['adresse2'];
+					$i_adresse .= $individu[0]['cp'] . " " . $individu[0]['v_nom'];
 
-						$pdf->AddFont('ocraextended');
-						$pdf->SetFont('ocraextended');
+					$pdf->Cell(100);
+					$pdf->MultiCell(0, 6, $i_adresse, 0, 'L');
 
-						$i_adresse = $individu[0]["i_nom"] . " " . $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
-						if ($individu[0]['adresse2'] != NULL)
-						$i_adresse .= $individu[0]['adresse2'] . "\n";
-						$i_adresse .= $individu[0]['cp'] . " " . $individu[0]['v_nom'];
+					$pdf->SetY(140);
+					$pdf->SetFont('Arial','',12);
 
-						$pdf->Cell(100);
-						$pdf->MultiCell(0, 6, $i_adresse, 0, 'L');
-
-						$pdf->SetY(140);
-						$pdf->SetFont('Arial','',12);
-
-						//Affectations
-						foreach($affectations as $cle=>$valeur)
-						{
-							$affectation = outils::date_sql_fr($valeur["jour"]) . " : " . $valeur["libelle"] . " de " . $valeur["heure_debut"] . " à " . $valeur["heure_fin"];
-							$pdf->Cell(0,5,$affectation,0,1);
-						}
+					//Affectations
+					foreach($affectations as $cle=>$valeur)
+					{
+						$affectation = outils::date_sql_fr($valeur["jour"]) . " : " . $valeur["libelle"] . " de " . $valeur["heure_debut"] . " à " . $valeur["heure_fin"];
+						$pdf->Cell(0,5,$affectation,0,1);
 					}
 				}
-				$pdf->Output("Affectations-lieu-".$lieu_id."-".$festival->annee.".pdf", 'D');
 			}
-			else
-			Outils::http401();
+			$pdf->Output("Affectations-lieu-".$lieu_id."-".$festival->annee.".pdf", 'D');
 		}
 		else
 		Outils::http401();
 	}
+	else
+	Outils::http401();
+}
 
-	static function imprimer_vacations_domaine() {
-		F3::call('outils::verif_admin');
+static function imprimer_vacations_domaine() {
+	F3::call('outils::verif_admin');
 
-		ini_set('max_execution_time', '0');
+	ini_set('max_execution_time', '0');
+		
+	$domaine_id = F3::get('PARAMS.id');
 
-		$domaine_id = F3::get('PARAMS.id');
+	if(is_numeric($domaine_id))
+	{
+		$domaine = new Axon('domaines');
+		$domaine->load("id=$domaine_id");
 
-		if(is_numeric($domaine_id))
+		if(!$domaine->dry())
 		{
-			$domaine = new Axon('domaines');
-			$domaine->load("id=$domaine_id");
+			require_once 'lib/pdf.php';
+			require_once 'lib/barcode-ean13.php';
 
-			if(!$domaine->dry())
-			{
-				require_once 'lib/pdf.php';
-				require_once 'lib/barcode-ean13.php';
+			//Instanciation de la classe dérivée
+			$pdf=new PDF_EAN13();
+			$pdf->SetMargins(5, 5);
 
-				//Instanciation de la classe dérivée
-				$pdf=new PDF_EAN13();
-				$pdf->SetMargins(5, 5);
+			$festival_id = F3::get('SESSION.festival_id');
 
-				$festival_id = F3::get('SESSION.festival_id');
+			$festival = new Axon('festivals');
+			$festival->load("id=$festival_id");
 
-				$festival = new Axon('festivals');
-				$festival->load("id=$festival_id");
+			$individus = Domaines::membres_domaine($domaine_id, $festival_id);
 
-				$individus = Domaines::membres_domaine($domaine_id, $festival_id);
+			foreach ($individus as $individu) {
+				$individu_id = $individu["id"];
 
 				//Affectations
 				$affectations = DB::sql("SELECT fj.jour, v.heure_debut, v.heure_fin, l.libelle FROM lieux AS l, affectations AS a, vacations AS v, festivals_jours AS fj WHERE v.lieu_id = l.id AND a.vacation_id = v.id AND fj.id = v.festival_jour_id AND fj.festival_id = $festival_id AND a.individu_id = $individu_id ORDER BY fj.jour, v.heure_debut;");
@@ -1391,16 +1286,11 @@ static function imprimer_emargement_lieu() {
 					$pdf->AddPage();
 					$pdf->SetFont('Arial','',15);
 
-					//Affectations
-					$affectations = F3::sql("SELECT fj.jour, v.heure_debut, v.heure_fin, l.libelle FROM lieux AS l, affectations AS a, vacations AS v, festivals_jours AS fj WHERE v.lieu_id = l.id AND a.vacation_id = v.id AND fj.id = v.festival_jour_id AND fj.festival_id = $festival_id AND a.individu_id = $individu_id ORDER BY fj.jour, v.heure_debut;");
-					if (count($affectations)>0)
-					{
-						$pdf->AddPage();
-						$pdf->SetFont('Arial','',15);
+					$pdf->EAN13(116,30,$individu_id + 000000000000);
 
 					$individu = DB::sql("SELECT i.nom AS i_nom, i.prenom, i.adresse1, i.adresse2, v.cp, v.nom AS v_nom FROM individus AS i, villes AS v WHERE i.ville_id = v.id AND i.id=$individu_id");
 
-						$individu = F3::sql("SELECT i.nom AS i_nom, i.prenom, i.adresse1, i.adresse2, v.cp, v.nom AS v_nom FROM individus AS i, villes AS v WHERE i.ville_id = v.id AND i.id=$individu_id");
+					$pdf->SetY(55);
 
 					//Organisme
 					$organisme = DB::sql("SELECT o.id, o.libelle FROM organismes AS o, historique_organismes AS ho WHERE ho.individu_id=$individu_id AND ho.festival_id=$festival_id AND ho.organisme_id=o.id");
@@ -1413,66 +1303,61 @@ static function imprimer_emargement_lieu() {
 						if (count($o_responsable))
 						$o_infos .= "\n" . "Contact: " . $o_responsable[0]['nom'] . " " . $o_responsable[0]['prenom'];
 
-							$organisme_id = $organisme[0]['id'];
-							$o_responsable = F3::sql("SELECT i.prenom, i.nom FROM individus AS i, historique_organismes AS ho WHERE ho.individu_id=i.id AND ho.responsable=1 AND ho.organisme_id=$organisme_id");
-							if (count($o_responsable))
-							$o_infos .= "\n" . "Contact: " . $o_responsable[0]['nom'] . " " . $o_responsable[0]['prenom'];
+						$pdf->MultiCell(0, 6, $o_infos, 0, 'L');
+					}
 
-							$pdf->MultiCell(0, 6, $o_infos, 0, 'L');
-						}
+					$pdf->SetY(55);
+						
+					$pdf->AddFont('ocraextended');
+					$pdf->SetFont('ocraextended');
 
-						$pdf->SetY(55);
+					$i_adresse = $individu[0]["i_nom"] . " " . $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
+					if ($individu[0]['adresse2'] != NULL)
+					$i_adresse .= $individu[0]['adresse2'];
+					$i_adresse .= $individu[0]['cp'] . " " . $individu[0]['v_nom'];
+						
+					$pdf->Cell(100);
+					$pdf->MultiCell(0, 6, $i_adresse, 0, 'L');
 
-						$pdf->AddFont('ocraextended');
-						$pdf->SetFont('ocraextended');
+					$pdf->SetY(140);
+					$pdf->SetFont('Arial','',12);
 
-						$i_adresse = $individu[0]["i_nom"] . " " . $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
-						if ($individu[0]['adresse2'] != NULL)
-						$i_adresse .= $individu[0]['adresse2'] . "\n";
-						$i_adresse .= $individu[0]['cp'] . " " . $individu[0]['v_nom'];
-
-						$pdf->Cell(100);
-						$pdf->MultiCell(0, 6, $i_adresse, 0, 'L');
-
-						$pdf->SetY(140);
-						$pdf->SetFont('Arial','',12);
-
-						//Affectations
-						foreach($affectations as $cle=>$valeur)
-						{
-							$affectation = outils::date_sql_fr($valeur["jour"]) . " : " . $valeur["libelle"] . " de " . $valeur["heure_debut"] . " à " . $valeur["heure_fin"];
-							$pdf->Cell(0,5,$affectation,0,1);
-						}
+					//Affectations
+					foreach($affectations as $cle=>$valeur)
+					{
+						$affectation = outils::date_sql_fr($valeur["jour"]) . " : " . $valeur["libelle"] . " de " . $valeur["heure_debut"] . " à " . $valeur["heure_fin"];
+						$pdf->Cell(0,5,$affectation,0,1);
 					}
 				}
-				$pdf->Output("Affectations-domaine-".$domaine_id."-".$festival->annee.".pdf", 'D');
 			}
-			else
-			Outils::http401();
+			$pdf->Output("Affectations-domaine-".$domaine_id."-".$festival->annee.".pdf", 'D');
 		}
 		else
 		Outils::http401();
 	}
+	else
+	Outils::http401();
+}
 
-	static function imprimer_tout() {
-		F3::call('outils::verif_admin');
+static function imprimer_tout() {
+	F3::call('outils::verif_admin');
 
-		ini_set('max_execution_time', '0');
+	ini_set('max_execution_time', '0');
 
-		$festival_id = F3::get('SESSION.festival_id');
+	$festival_id = F3::get('SESSION.festival_id');
 
-		require_once 'lib/pdf.php';
-		require_once 'lib/barcode-ean13.php';
+	require_once 'lib/pdf.php';
+	require_once 'lib/barcode-ean13.php';
 
-		//Instanciation de la classe dérivée
-		$pdf=new PDF_EAN13();
-		$pdf->SetMargins(15, 15);
+	//Instanciation de la classe dérivée
+	$pdf=new PDF_EAN13();
+	$pdf->SetMargins(15, 15);
 
-		$festival = new Axon('festivals');
-		$festival->load("id=$festival_id");
+	$festival = new Axon('festivals');
+	$festival->load("id=$festival_id");
 
-		$code_postal_debut = F3::get('REQUEST.code_postal_debut');
-		$code_postal_fin = F3::get('REQUEST.code_postal_fin');
+	$code_postal_debut = F3::get('REQUEST.code_postal_debut');
+	$code_postal_fin = F3::get('REQUEST.code_postal_fin');
 
 	if($code_postal_debut!="" && $code_postal_fin!="")
 	$individus = DB::sql("SELECT individus.id AS individu_id, organismes.id AS organisme_id FROM `organismes`, `historique_organismes`, `individus`, `villes` WHERE historique_organismes.individu_id = individus.id AND historique_organismes.festival_id = $festival_id AND historique_organismes.organisme_id = organismes.id AND individus.ville_id = villes.id AND villes.cp >= $code_postal_debut AND villes.cp <= $code_postal_fin ORDER BY individus.id;");
@@ -1488,20 +1373,14 @@ static function imprimer_emargement_lieu() {
 		$affectations = DB::sql("SELECT fj.jour, v.heure_debut, v.heure_fin, l.libelle FROM lieux AS l, affectations AS a, vacations AS v, festivals_jours AS fj WHERE v.lieu_id = l.id AND a.vacation_id = v.id AND fj.id = v.festival_jour_id AND fj.festival_id = $festival_id AND a.individu_id = $individu_id ORDER BY fj.jour, v.heure_debut;");
 		if (count($affectations)>0)
 		{
-			$individu_id = $valeur["individu_id"];
-				
-			//Affectations
-			$affectations = F3::sql("SELECT fj.jour, v.heure_debut, v.heure_fin, l.libelle FROM lieux AS l, affectations AS a, vacations AS v, festivals_jours AS fj WHERE v.lieu_id = l.id AND a.vacation_id = v.id AND fj.id = v.festival_jour_id AND fj.festival_id = $festival_id AND a.individu_id = $individu_id ORDER BY fj.jour, v.heure_debut;");
-			if (count($affectations)>0)
-			{
-				$pdf->AddPage();
-				$pdf->SetFont('Arial','',15);
+			$pdf->AddPage();
+			$pdf->SetFont('Arial','',15);
 
-				$pdf->EAN13(116,30,$individu_id + 000000000000);
+			$pdf->EAN13(116,30,$individu_id + 000000000000);
 
 			$individu = DB::sql("SELECT i.nom AS i_nom, i.prenom, i.adresse1, i.adresse2, v.cp, v.nom AS v_nom FROM individus AS i, villes AS v WHERE i.ville_id = v.id AND i.id=$individu_id");
 
-				$pdf->SetY(55);
+			$pdf->SetY(55);
 
 			//Organisme
 			$organisme = DB::sql("SELECT o.id, o.libelle FROM organismes AS o, historique_organismes AS ho WHERE ho.individu_id=$individu_id AND ho.festival_id=$festival_id AND ho.organisme_id=o.id");
@@ -1519,68 +1398,66 @@ static function imprimer_emargement_lieu() {
 				
 			$pdf->SetY(55);
 
-				$pdf->SetY(55);
+			$pdf->AddFont('ocraextended');
+			$pdf->SetFont('ocraextended');
 
-				$pdf->AddFont('ocraextended');
-				$pdf->SetFont('ocraextended');
+			$i_adresse = $individu[0]["i_nom"] . " " . $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
+			if ($individu[0]['adresse2'] != NULL)
+			$i_adresse .= $individu[0]['adresse2'];
+			$i_adresse .= $individu[0]['cp'] . " " . $individu[0]['v_nom'];
 
-				$i_adresse = $individu[0]["i_nom"] . " " . $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
-				if ($individu[0]['adresse2'] != NULL)
-				$i_adresse .= $individu[0]['adresse2'] . "\n";
-				$i_adresse .= $individu[0]['cp'] . " " . $individu[0]['v_nom'];
+			$pdf->Cell(100);
+			$pdf->MultiCell(0, 6, $i_adresse, 0, 'L');
 
-				$pdf->Cell(100);
-				$pdf->MultiCell(0, 6, $i_adresse, 0, 'L');
+			$pdf->SetY(140);
+			$pdf->SetFont('Arial','',12);
 
-				$pdf->SetY(140);
-				$pdf->SetFont('Arial','',12);
-
-				//Affectations
-				foreach($affectations as $cle=>$valeur)
-				{
-					$affectation = outils::date_sql_fr($valeur["jour"]) . " : " . $valeur["libelle"] . " de " . $valeur["heure_debut"] . " à " . $valeur["heure_fin"];
-					$pdf->Cell(0,5,$affectation,0,1);
-				}
+			//Affectations
+			foreach($affectations as $cle=>$valeur)
+			{
+				$affectation = outils::date_sql_fr($valeur["jour"]) . " : " . $valeur["libelle"] . " de " . $valeur["heure_debut"] . " à " . $valeur["heure_fin"];
+				$pdf->Cell(0,5,$affectation,0,1);
 			}
 		}
-
-		$pdf->Output("Affectations-".$individu_id."-".$festival->annee.".pdf", 'D');
 	}
 
-	static function verif_vacation_id() {
-		F3::input('lieu_id',
-		function($value) {
-			if (!F3::exists('message')) {
-				if ( (preg_match('/^[0-9]+$/', $value) == 0) || $value == 0)
-				F3::set('message','Lieu incorrect');
-			}
+	$pdf->Output("Affectations-".$individu_id."-".$festival->annee.".pdf", 'D');
+}
+
+static function verif_vacation_id() {
+	F3::input('lieu_id',
+	function($value) {
+		if (!F3::exists('message')) {
+			if ( (preg_match('/^[0-9]+$/', $value) == 0) || $value == 0)
+			F3::set('message','Lieu incorrect');
 		}
-		);
 	}
+	);
+}
 
-	static function verif_responsable_id() {
-		F3::input('responsable_id',
-		function($value) {
-			if (!F3::exists('message')) {
-				if ( (preg_match('/^[0-9]+$/', $value) == 0) || $value == 0)
-				F3::set('message','Responsable incorrect');
-			}
+static function verif_responsable_id() {
+	F3::input('responsable_id',
+	function($value) {
+		if (!F3::exists('message')) {
+			if ( (preg_match('/^[0-9]+$/', $value) == 0) || $value == 0)
+			F3::set('message','Responsable incorrect');
 		}
-		);
 	}
+	);
+}
 
-	static function verif_libelle() {
-		F3::input('libelle',
-		function($value) {
-			if (!F3::exists('message')) {
-				if (empty($value))
-				F3::set('message','Libelle non renseigné');
-				elseif (strlen($value)>255)
-				F3::set('message','Libelle trop long');
-			}
+static function verif_libelle() {
+	F3::input('libelle',
+	function($value) {
+		if (!F3::exists('message')) {
+			if (empty($value))
+			F3::set('message','Libelle non renseigné');
+			elseif (strlen($value)>255)
+			F3::set('message','Libelle trop long');
 		}
-		);
 	}
+	);
+}
 
 static function recuperation_lieux() {
 	$festival_id = F3::get('SESSION.festival_id');
@@ -1599,5 +1476,6 @@ static function est_responsable() {
 	$result = F3::get('DB')->result;
 	if($result[0]['count'] == 1) return true;
 	return false;
+}
 }
 ?>
