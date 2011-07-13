@@ -285,32 +285,37 @@ class Vacations {
 		F3::call('outils::verif_responsable');
 		$festival_id = F3::get('SESSION.festival_id');
 		$vacation_id = F3::get('PARAMS.id');
-		$vacation=new Axon('vacations');
-		$vacation->load("id=$vacation_id");
+		
+		if(is_numeric($vacation_id))
+		{	
+			$vacation=new Axon('vacations');
+			$vacation->load("id=$vacation_id");
+		
+			if (!$vacation->dry()) {
+				$vacation->copyTo('REQUEST');
 
-		if (!$vacation->dry()) {
-			$vacation->copyTo('REQUEST');
+				F3::set('REQUEST.heure_debut', outils::date_sql_timepicker(F3::get('REQUEST.heure_debut')));
+				F3::set('REQUEST.heure_fin', outils::date_sql_timepicker(F3::get('REQUEST.heure_fin')));
 
-			F3::set('REQUEST.heure_debut', outils::date_sql_timepicker(F3::get('REQUEST.heure_debut')));
-			F3::set('REQUEST.heure_fin', outils::date_sql_timepicker(F3::get('REQUEST.heure_fin')));
+				if ($vacation->responsable_id != 0) {
+					$responsable_id = F3::get('REQUEST.responsable_id');
+					$individu=new Axon('individus');
+					$individu->load("id=$responsable_id");
+					F3::set('REQUEST.responsable', $individu->prenom . ' ' . $individu->nom . ' - ' .$individu->date_naissance);
+				}
 
-			if ($vacation->responsable_id != 0) {
-				$responsable_id = F3::get('REQUEST.responsable_id');
-				$individu=new Axon('individus');
-				$individu->load("id=$responsable_id");
-				F3::set('REQUEST.responsable', $individu->prenom . ' ' . $individu->nom . ' - ' .$individu->date_naissance);
+				$membres = DB::sql("SELECT individus.id, individus.prenom, individus.nom, organismes.libelle FROM vacations, individus, affectations, organismes, historique_organismes WHERE vacations.id = $vacation_id AND historique_organismes.festival_id = $festival_id AND historique_organismes.individu_id = individus.id AND organismes.id = historique_organismes.organisme_id AND individus.id = affectations.individu_id AND affectations.vacation_id = vacations.id ORDER BY individus.nom;");
+				if (count($membres) > 0)
+				F3::set('membres', $membres);
+
+				F3::call('vacations::recuperation_lieux');
+				F3::call('outils::recuperation_festivals_jours');
+				F3::set('editer','1');
+				F3::set('pagetitle','Edition de la vacation ' . $vacation_id);
+				F3::set('template','form_vacations');
+				F3::call('outils::generer');
 			}
-
-			$membres = DB::sql("SELECT individus.id, individus.prenom, individus.nom, organismes.libelle FROM vacations, individus, affectations, organismes, historique_organismes WHERE vacations.id = $vacation_id AND historique_organismes.festival_id = $festival_id AND historique_organismes.individu_id = individus.id AND organismes.id = historique_organismes.organisme_id AND individus.id = affectations.individu_id AND affectations.vacation_id = vacations.id ORDER BY individus.nom;");
-			if (count($membres) > 0)
-			F3::set('membres', $membres);
-
-			F3::call('vacations::recuperation_lieux');
-			F3::call('outils::recuperation_festivals_jours');
-			F3::set('editer','1');
-			F3::set('pagetitle','Edition de la vacation ' . $vacation_id);
-			F3::set('template','form_vacations');
-			F3::call('outils::generer');
+			else F3::http404();
 		}
 		else F3::http404();
 	}
@@ -390,7 +395,7 @@ class Vacations {
 		// Suppression d'un éventuel précédent message d'erreur
 		F3::clear('message');
 		// Vérification des champs
-		F3::call('vacations::verif_libelle|vacations::verif_responsable_id'); //TODO: factoriser toutes ces verif dans outils // TODO: Verif autres champs
+		F3::call('vacations::verif::vacation_id|vacations::verif_libelle|vacations::verif_responsable_id'); //TODO: factoriser toutes ces verif dans outils // TODO: Verif autres champs
 		if (!F3::exists('message')) {
 
 			// Pas d'erreur, enregistrement de la organisme
@@ -577,7 +582,7 @@ class Vacations {
 				$pdf->AliasNbPages();
 				$pdf->AddPage();
 					
-				$responsable = DB::sql("SELECT i.photo, i.nom, i.prenom, i.adresse1, i.adresse2, vi.cp, vi.nom FROM individus AS i, villes AS vi, vacations AS va WHERE va.id=$vacation_id AND va.responsable_id=i.id AND i.ville_id=vi.id");
+				$responsable = DB::sql("SELECT i.photo, i.nom AS nom_individu, i.prenom, i.adresse1, i.adresse2, vi.cp, vi.nom AS nom_ville FROM individus AS i, villes AS vi, vacations AS va WHERE va.id=$vacation_id AND va.responsable_id=i.id AND i.ville_id=vi.id");
 				if (count($responsable)>0)
 				{
 					$pdf->SetFont('Arial','B',14);
@@ -590,7 +595,7 @@ class Vacations {
 					$pdf->Image("uploads/photos/". $responsable[0]['photo'] ,15,49,null,30);
 
 					$pdf->Cell(25);
-					$pdf->Cell(0,6,$responsable[0]['nom'] . " " . $responsable[0]['prenom'] ,0,1, 'L');
+					$pdf->Cell(0,6,$responsable[0]['nom_individu'] . " " . $responsable[0]['prenom'] ,0,1, 'L');
 
 					if ($responsable[0]['adresse1'] != NULL)
 					{
@@ -606,7 +611,7 @@ class Vacations {
 					}
 
 					$pdf->Cell(25);
-					$pdf->Cell(0,6,$responsable[0]['cp'] . " " . $responsable[0]['nom'],0,1, 'L');
+					$pdf->Cell(0,6,$responsable[0]['cp'] . " " . $responsable[0]['nom_ville'],0,1, 'L');
 				}
 
 				$pdf->Line(140,40,140,68);
@@ -620,7 +625,7 @@ class Vacations {
 				$pdf->Cell(150);
 				$pdf->Cell(0,6,$vacation->libelle . " (ID:" . $vacation_id . ")" ,0,1, 'L');
 				$pdf->Cell(150);
-				$$pdf->Cell(0,6,"Date : " . outils::date_sql_fr($festivals_jours->jour),0,1, 'L');
+				$pdf->Cell(0,6,"Date : " . outils::date_sql_fr($festivals_jours->jour),0,1, 'L');
 				$pdf->Cell(150);
 				$pdf->Cell(0,6,"Heure debut : " . outils::date_sql_timepicker($vacation->heure_debut) . " - Heure fin : " . outils::date_sql_timepicker($vacation->heure_fin),0,1, 'L');
 				$pdf->Cell(150);
@@ -690,7 +695,7 @@ class Vacations {
 
 					$pdf->AddPage();
 
-					$responsable = DB::sql("SELECT i.photo, i.nom, i.prenom, i.adresse1, i.adresse2, vi.cp, vi.nom FROM individus AS i, villes AS vi, vacations AS va WHERE va.id=$vacation_id AND va.responsable_id=i.id AND i.ville_id=vi.id");
+					$responsable = DB::sql("SELECT i.photo, i.nom AS nom_individu, i.prenom, i.adresse1, i.adresse2, vi.cp, vi.nom AS nom_ville FROM individus AS i, villes AS vi, vacations AS va WHERE va.id=$vacation_id AND va.responsable_id=i.id AND i.ville_id=vi.id");
 					if (count($responsable)>0)
 					{
 						$pdf->SetFont('Arial','B',14);
@@ -703,7 +708,7 @@ class Vacations {
 						$pdf->Image("uploads/photos/". $responsable[0]['photo'] ,15,49,null,30);
 
 						$pdf->Cell(25);
-						$pdf->Cell(0,6,$responsable[0]['nom'] . " " . $responsable[0]['prenom'] ,0,1, 'L');
+						$pdf->Cell(0,6,$responsable[0]['nom_individu'] . " " . $responsable[0]['prenom'] ,0,1, 'L');
 
 						if ($responsable[0]['adresse1'] != NULL)
 						{
@@ -717,7 +722,7 @@ class Vacations {
 						}
 
 						$pdf->Cell(25);
-						$pdf->Cell(0,6,$responsable[0]['cp'] . " " . $responsable[0]['nom'],0,1, 'L');
+						$pdf->Cell(0,6,$responsable[0]['cp'] . " " . $responsable[0]['nom_ville'],0,1, 'L');
 					}
 
 					$pdf->Line(140,40,140,65);
@@ -807,7 +812,7 @@ class Vacations {
 
 						$pdf->AddPage();
 
-						$responsable = DB::sql("SELECT i.photo, i.nom, i.prenom, i.adresse1, i.adresse2, vi.cp, vi.nom FROM individus AS i, villes AS vi, vacations AS va WHERE va.id=$vacation_id AND va.responsable_id=i.id AND i.ville_id=vi.id");
+						$responsable = DB::sql("SELECT i.photo, i.nom AS nom_individu, i.prenom, i.adresse1, i.adresse2, vi.cp, vi.nom AS nom_ville FROM individus AS i, villes AS vi, vacations AS va WHERE va.id=$vacation_id AND va.responsable_id=i.id AND i.ville_id=vi.id");
 						if (count($responsable)>0)
 						{
 							$pdf->SetFont('Arial','B',14);
@@ -820,7 +825,7 @@ class Vacations {
 							$pdf->Image("uploads/photos/". $responsable[0]['photo'] ,15,49,null,30);
 
 							$pdf->Cell(25);
-							$pdf->Cell(0,6,$responsable[0]['nom'] . " " . $responsable[0]['prenom'] ,0,1, 'L');
+							$pdf->Cell(0,6,$responsable[0]['nom_individu'] . " " . $responsable[0]['prenom'] ,0,1, 'L');
 
 							if ($responsable[0]['adresse1'] != NULL)
 							{
@@ -834,7 +839,7 @@ class Vacations {
 							}
 
 							$pdf->Cell(25);
-							$pdf->Cell(0,6,$responsable[0]['cp'] . " " . $responsable[0]['nom'],0,1, 'L');
+							$pdf->Cell(0,6,$responsable[0]['cp'] . " " . $responsable[0]['nom_ville'],0,1, 'L');
 						}
 
 						$pdf->Line(140,40,140,65);
@@ -1435,11 +1440,11 @@ class Vacations {
 	}
 
 	static function verif_vacation_id() {
-		F3::input('lieu_id',
+		F3::input('vacation_id',
 		function($value) {
 			if (!F3::exists('message')) {
 				if ( (preg_match('/^[0-9]+$/', $value) == 0) || $value == 0)
-				F3::set('message','Lieu incorrect');
+				F3::set('message','Vacation incorrecte');
 			}
 		}
 		);
