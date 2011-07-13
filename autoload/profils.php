@@ -209,7 +209,6 @@ class Profils {
 			//Acces & tickets
 			F3::set('autorisation',acces::autorisation_individu($individu_id));
 			F3::set('tickets',acces::tickets_individu($individu_id));
-			F3::set('present',acces::present($individu_id,$festival_id));
 
 			// Affectations :
 			DB::sql("SELECT affectations.id, festivals_jours.jour, vacations.heure_debut, vacations.heure_fin, lieux.libelle FROM `lieux`, `affectations`, `vacations`, `festivals_jours` WHERE vacations.lieu_id = lieux.id AND affectations.vacation_id = vacations.id AND festivals_jours.id = vacations.festival_jour_id AND festivals_jours.festival_id = $festival_id AND affectations.individu_id = $individu_id ORDER BY festivals_jours.jour;");
@@ -217,9 +216,18 @@ class Profils {
 			F3::set('assignations',F3::get('DB')->result);
 
 			DB::sql("SELECT libelle FROM `historique_organismes`, `organismes` WHERE historique_organismes.festival_id = $festival_id AND organismes.id = historique_organismes.organisme_id AND historique_organismes.individu_id = $individu_id ;");
-			F3::set('organisme',F3::get('DB')->result[0]['libelle']);
-
-
+			
+			//Organisme
+			if (count(F3::get('DB')->result) == 0)
+			{		
+				F3::set('message', 'Personne non inscrite pour le festival');
+			}
+			else
+			{
+				F3::set('organisme',F3::get('DB')->result[0]['libelle']);
+				F3::set('present',acces::present($individu_id,$festival_id));
+			}
+				
 			F3::set('pagetitle',"Profil de $individu->prenom $individu->nom");
 			F3::set('template','affichage_profil');
 			F3::call('outils::generer');

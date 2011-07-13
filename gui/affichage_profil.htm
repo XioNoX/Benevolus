@@ -3,11 +3,18 @@
 <F3:check if="{{@acces}}">
 	<F3:true>
 		Nombre d'accès déjà remis : {{@nb_acces_remis}}
-		<form name="acces_entrees" method="post" action="{{@PARAMS.0}}"><label
-			for="codebarres">Code barre :</label> <input type="text"
-			name="codebarres" id="codebarres" value=""
-			required autofocus maxlength="13" /> <input type="submit" name="submit"
-			value="Valider" /></form>
+		<form name="acces_entrees" method="post" action="{{@PARAMS.0}}">
+			<label for="codebarres">Code barre :</label> <input type="text"
+				name="codebarres" id="codebarres" value="" required autofocus
+				maxlength="13" /> <input type="submit" name="submit"
+				value="Valider" />
+		</form>
+	</F3:true>
+</F3:check>
+
+<F3:check if="{{@succes}}">
+	<F3:true>
+		<p class="pass">{{@succes}}</p>
 	</F3:true>
 </F3:check>
 
@@ -15,72 +22,72 @@
 	<F3:true>
 		<p class="fail">{{@message}}</p>
 	</F3:true>
-</F3:check>
-<F3:check if="{{@succes}}">
-	<F3:true>
-		<p class="pass">{{@succes}}</p>
-	</F3:true>
-</F3:check>
-
-<fieldset><F3:check if="{{@REQUEST.photo}}">
-	<F3:true>
-		<img src="/uploads/photos/{{@REQUEST.photo}}"
-			style="margin-bottom: 10px;" \/>
-	</F3:true>
-</F3:check> <br />
-Indentifiant : {{@REQUEST.id}} <br />
-Email : <a href="mailto:{{@REQUEST.email}}">{{@REQUEST.email}}</a><br />
-Date de naissance : {{@REQUEST.date_naissance}} <br />
-Téléphone fixe : {{@REQUEST.telephone_fixe}} <br />
-Téléphone portable : {{@REQUEST.telephone_portable}} <br />
-Adresse : {{@REQUEST.adresse1}} <br />
-{{@REQUEST.adresse2}} <br />
-{{@ville}} <br />
-Organisme : {{@organisme}} <br />
-<br />
-</fieldset>
-
-<F3:check if="{{@acces}}">
-	<F3:true>
-<fieldset><legend>Accès :</legend> <b>Tickets : </b>
-{{@tickets}} <br>
-<b>Accréditation : </b> {{@autorisation}} <br />
-<b>Déjà retiré : </b> {{@present}}
-</F3:true>
-</fieldset>
-</F3:check>
-<fieldset><legend>Tranches horaires :</legend> <F3:check if="{{@assignations}}">
-
-	<F3:true>
-		<ul>
-			<F3:repeat group="{{@assignations}}" value="{{@item}}">
-				<li>{{strftime("%A %d %B",strtotime(@item.jour))}} à {{@item.libelle}} de {{@item.heure_debut}} à {{@item.heure_fin}}.</li>
-			</F3:repeat>
-		</ul>
-
-		<a href="/vacations/imprimer/{{@REQUEST.id}}">Imprimer ma
-		convocation</a>
-	</F3:true>
 	<F3:false>
-      Rien pour le moment.
-    </F3:false>
-</F3:check></fieldset>
-
-<F3:check if="{{@acces}}">
-	<F3:true>
-		<form name="acces_entrees" method="post" action="{{@PARAMS.0}}"><input
-			type="hidden" name="individu_id" id="individu_id"
-			value="{{@REQUEST.id}}" required />
-			
-			<F3:check if="{{@present == 'non'}}">
+		<fieldset>
+			<F3:check if="{{@REQUEST.photo}}">
 				<F3:true>
-					<input type="submit" name="present" value="Accès remis" />
+					<img src="/uploads/photos/{{@REQUEST.photo}}"
+						style="margin-bottom: 10px;" \/>
+				</F3:true>
+			</F3:check>
+			<br /> Indentifiant : {{@REQUEST.id}} <br /> Email : <a
+				href="mailto:{{@REQUEST.email}}">{{@REQUEST.email}}</a><br /> Date
+			de naissance : {{@REQUEST.date_naissance}} <br /> Téléphone fixe :
+			{{@REQUEST.telephone_fixe}} <br /> Téléphone portable :
+			{{@REQUEST.telephone_portable}} <br /> Adresse :
+			{{@REQUEST.adresse1}} <br /> {{@REQUEST.adresse2}} <br />
+			{{@ville}} <br /> Organisme : {{@organisme}} <br /> <br />
+		</fieldset>
+
+		<F3:check if="{{@acces}}">
+			<F3:true>
+				<fieldset>
+					<legend>Accès :</legend>
+					<b>Tickets : </b> {{@tickets}} <br> <b>Accréditation : </b>
+					{{@autorisation}} <br /> <b>Déjà retiré : </b> {{@present}}
+			</F3:true>
+			</fieldset>
+		</F3:check>
+		<fieldset>
+			<legend>Tranches horaires :</legend>
+			<F3:check if="{{@assignations}}">
+
+				<F3:true>
+					<ul>
+						<F3:repeat group="{{@assignations}}" value="{{@item}}">
+							<li>{{strftime("%A %d %B",strtotime(@item.jour))}} à
+								{{@item.libelle}} de {{@item.heure_debut}} à
+								{{@item.heure_fin}}.</li>
+						</F3:repeat>
+					</ul>
+
+					<a href="/vacations/imprimer/{{@REQUEST.id}}">Imprimer ma
+						convocation</a>
 				</F3:true>
 				<F3:false>
-					<input type="submit" name="present" value="Accès remis" disabled="disabled" />
-				</F3:false>
+      Rien pour le moment.
+    </F3:false>
 			</F3:check>
-			
-		</form>
-	</F3:true>
+		</fieldset>
+
+		<F3:check if="{{@acces}}">
+			<F3:true>
+				<form name="acces_entrees" method="post" action="{{@PARAMS.0}}">
+					<input type="hidden" name="individu_id" id="individu_id"
+						value="{{@REQUEST.id}}" required />
+
+					<F3:check if="{{@present == 'non'}}">
+						<F3:true>
+							<input type="submit" name="present" value="Accès remis" />
+						</F3:true>
+						<F3:false>
+							<input type="submit" name="present" value="Accès remis"
+								disabled="disabled" />
+						</F3:false>
+					</F3:check>
+
+				</form>
+			</F3:true>
+		</F3:check>
+	</F3:false>
 </F3:check>

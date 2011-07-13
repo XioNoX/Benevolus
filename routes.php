@@ -164,8 +164,8 @@ F3::route('GET /ajax/profils_vacations','ajax::profils_vacations');
 F3::route('GET /ajax/profils_vacations/@type/@id','ajax::profils_vacations');
 F3::route('GET /ajax/groupe','ajax::groupe');
 
-F3::route('GET /acces/entrees','acces::entrees'); //NOK
-F3::route('POST /acces/entrees','acces::entrees'); //NOK
+F3::route('GET /acces/entrees','acces::entrees');
+F3::route('POST /acces/entrees','acces::entrees');
 F3::route('GET /acces/profil/@id','acces::acces_profil'); //NOK
 F3::route('POST /acces/profil/@id','acces::acces_profil_post'); //NOK
 F3::route('GET /acces','acces::lister');

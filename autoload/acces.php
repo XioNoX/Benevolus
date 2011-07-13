@@ -73,7 +73,7 @@ class Acces {
 		$start = $limit*$page - $limit; // do not put $limit*($page - 1)
 		if ($start<0) $start = 0;
 		DB::sql("SELECT acces.id, acces_types.libelle, individus.nom, individus.prenom FROM acces,acces_types, individus WHERE individus.id = acces.individu_id AND  acces.acces_type_id=acces_types.id AND acces_types.festival_id = $festival_id ".$wh." ORDER BY $sidx $sord LIMIT $start, $limit;");
-		
+
 		$reponse = new stdClass();
 		$reponse->page = $page;
 		$reponse->total = $total_pages;
@@ -132,209 +132,216 @@ class Acces {
 			switch (F3::get('REQUEST.type_groupe')) {
 				case 'domaine':
 					$membres = domaines::membres_domaine($groupe_id,$festival_id);
-			break;
+					break;
 
-			case 'lieu':
+				case 'lieu':
 					$membres = lieux::membres_lieu($groupe_id,$festival_id);
-				
-				break;
 
-			case 'organisme':
+					break;
+
+				case 'organisme':
 					$membres = organismes::membres_organisme($groupe_id,$festival_id);
-				
-				break;
-			default:
-				F3::set('messages','Type de groupe inconnu');
-				break;
-		}
-		if(isset($membres)){
-			foreach ($membres as $row) {
-				$acces=new Axon('acces');
-				$acces->acces_type_id = F3::get('REQUEST.acces_type_id');
-				$acces->individu_id = $row['id'];
-				$acces->save();
+
+					break;
+				default:
+					F3::set('messages','Type de groupe inconnu');
+					break;
 			}
-				
-			historique::logger("Création de l'accès particulier pour $groupe_id ($type)");
-			F3::reroute('/acces');
-		}
-		F3::call('acces::ajouter');
-		
-	}
-	else
-	{
-		F3::call('outils::verif_individu_id');
-		if (!F3::exists('message')) {
-			$acces=new Axon('acces');
-			$acces->copyFrom('REQUEST');
-			$acces->save();
-			$acces_id = $acces->_id;
-			historique::logger("Création de l'accès particulier $acces_id");
-			F3::reroute('/acces');
-		}
-		// Ré-Affichage du formulaire
-		F3::call('acces::ajouter');
-	}
-}
+			if(isset($membres)){
+				foreach ($membres as $row) {
+					$acces=new Axon('acces');
+					$acces->acces_type_id = F3::get('REQUEST.acces_type_id');
+					$acces->individu_id = $row['id'];
+					$acces->save();
+				}
 
-static function editer() {
-	F3::call('outils::menu');
-	F3::call('outils::verif_admin');
-	outils::activerJqgrid();
-	$id = F3::get('PARAMS.id');
+				historique::logger("Création de l'accès particulier pour $groupe_id ($type)");
+				F3::reroute('/acces');
+			}
+			F3::call('acces::ajouter');
 
-	if(!is_numeric($id)) $id = 0;
-	$festival_id = F3::get('SESSION.festival_id');
-	DB::sql("SELECT acces_types.id, acces_types.libelle FROM acces_types WHERE festival_id = $festival_id ORDER BY libelle;");
-	F3::set('acces_types',F3::get('DB')->result);
-	$acces=new Axon('acces');
-	$acces->load("id=$id");
-	if (!$acces->dry()) {
-		$acces->copyTo('REQUEST');
-		$individu_id = $acces->individu_id;
-		F3::set('REQUEST.responsable_id',$individu_id);
-		if ($individu_id != '') {
-			$individus=new Axon('individus');
-			$individus->load("id=$individu_id");
-			F3::set('REQUEST.individu', $individus->prenom . ' ' . $individus->nom . ' - ' . outils::date_sql_fr($individus->date_naissance));
-		}
-		F3::set('pagetitle','Editer un accès');
-		F3::set('template','form_acces');
-		F3::call('outils::generer');
-	}
-	else F3::http404();
-}
-
-static function editer_post() {
-	F3::call('outils::verif_admin');
-	$acces_id = F3::get('PARAMS.id');
-	// Suppression d'un éventuel précédent message d'erreur
-	F3::clear('message');
-	// Vérification des champs
-	F3::call('outils::verif_individu_id');
-	if (!F3::exists('message')) {
-		if(!is_numeric($acces_id)) $acces_id = 0;
-		// Pas d'erreur, enregistrement de la MAJ
-		$acces=new Axon('acces');
-		$acces->load("id=$acces_id");
-		//$acces->individu_id=F3::get("REQUEST.individu_id");
-		//$acces->acces_type_id=F3::get("REQUEST.acces_type_id");
-		$acces->copyFrom('REQUEST'); //bug
-		//print_r(F3::get("REQUEST"));
-		$acces->save();
-
-		historique::logger("Édition de l'accès numéro $acces_id");
-		F3::reroute('/acces');
-	}
-	// Ré-Affichage du formulaire
-	F3::call('acces::editer');
-}
-
-static function entrees() {
-
-	F3::call('outils::verif_operateur');
-	$festival_id = F3::get('SESSION.festival_id');
-
-	$sql_acces_remis = DB::sql("SELECT COUNT(*) AS nb_acces_remis FROM historique_organismes WHERE `present` = 1 AND `festival_id` = $festival_id;");
-	
-	F3::set('nb_acces_remis', $sql_acces_remis[0]["nb_acces_remis"]);
-	
-	$codebarres = F3::get('REQUEST.codebarres');//TODO vérif du checksum
-	$present = F3::get('REQUEST.present');
-	$individu_id = F3::get('REQUEST.individu_id');
-	if($present != "")
-	{
-		DB::sql("UPDATE `historique_organismes` SET `present` = 1 WHERE `individu_id` = $individu_id AND `festival_id` = $festival_id;");
-		F3::set('succes','Enregistré');
-	}
-	else
-	{
-		if(!is_numeric($codebarres))
-		F3::set('message','Code barres incorrect');
-		else if(strlen($codebarres) != 13){
-			F3::set('PARAMS.id',$codebarres);
 		}
 		else
 		{
-			$individu_id = substr($codebarres, 0, -1);
-			F3::set('PARAMS.id',$individu_id);
+			F3::call('outils::verif_individu_id');
+			if (!F3::exists('message')) {
+				$acces=new Axon('acces');
+				$acces->copyFrom('REQUEST');
+				$acces->save();
+				$acces_id = $acces->_id;
+				historique::logger("Création de l'accès particulier $acces_id");
+				F3::reroute('/acces');
+			}
+			// Ré-Affichage du formulaire
+			F3::call('acces::ajouter');
 		}
 	}
 
-	F3::set('acces',1);
-	F3::call('profils::afficher');
-}
+	static function editer() {
+		F3::call('outils::menu');
+		F3::call('outils::verif_admin');
+		outils::activerJqgrid();
+		$id = F3::get('PARAMS.id');
 
-
-static function present($individu_id, $festival_id) {
-	if ($festival_id == "") $festival_id = F3::get('SESSION.festival_id');
-	DB::sql("SELECT `present` FROM `historique_organismes` WHERE `individu_id` = $individu_id AND `festival_id` = $festival_id;");
-	if(F3::get('DB')->result[0]['present'] == 1)
-	return "oui";
-	return "non";
-}
-
-
-static function acces_profil() {
-
-}
-
-static function autorisation_individu($individu_id) {
-	$festival_id = F3::get('SESSION.festival_id');
-
-	// Si pas de bypass dans la bdd
-	// Si responsable alors badge
-	// Sinon bracelet bénévole
-
-
-	// Si pas de bypass dans la bdd
-	DB::sql("SELECT libelle FROM `acces_types`, `acces` WHERE acces.acces_type_id=acces_types.id AND `acces`.individu_id = $individu_id AND `acces_types`.festival_id = $festival_id;");
-	if(count(F3::get('DB')->result)>0){
-		$retour = "";
-		foreach (F3::get('DB')->result as $row){
-			$retour .= $row['libelle'].'<br>';
+		if(!is_numeric($id)) $id = 0;
+		$festival_id = F3::get('SESSION.festival_id');
+		DB::sql("SELECT acces_types.id, acces_types.libelle FROM acces_types WHERE festival_id = $festival_id ORDER BY libelle;");
+		F3::set('acces_types',F3::get('DB')->result);
+		$acces=new Axon('acces');
+		$acces->load("id=$id");
+		if (!$acces->dry()) {
+			$acces->copyTo('REQUEST');
+			$individu_id = $acces->individu_id;
+			F3::set('REQUEST.responsable_id',$individu_id);
+			if ($individu_id != '') {
+				$individus=new Axon('individus');
+				$individus->load("id=$individu_id");
+				F3::set('REQUEST.individu', $individus->prenom . ' ' . $individus->nom . ' - ' . outils::date_sql_fr($individus->date_naissance));
+			}
+			F3::set('pagetitle','Editer un accès');
+			F3::set('template','form_acces');
+			F3::call('outils::generer');
 		}
-		return $retour;
+		else F3::http404();
 	}
-	DB::sql("SELECT count(id) as count FROM `historique_organismes` WHERE `historique_organismes`.responsable = 1 AND `historique_organismes`.individu_id = $individu_id AND `historique_organismes`.festival_id = $festival_id;");
-	if(F3::get('DB')->result[0]['count'] > 0)
-	return "Bracelet bénévole";
 
-	DB::sql("SELECT count(`affectations`.id) as count FROM `affectations`, `vacations`, `festivals_jours` WHERE vacations.festival_jour_id = `festivals_jours`.id AND `affectations`.vacation_id = vacations.id AND `affectations`.individu_id = $individu_id AND `festivals_jours`.festival_id = $festival_id;");
-	if(F3::get('DB')->result[0]['count'] > 0)
-	return "Bracelet bénévole";
+	static function editer_post() {
+		F3::call('outils::verif_admin');
+		$acces_id = F3::get('PARAMS.id');
+		// Suppression d'un éventuel précédent message d'erreur
+		F3::clear('message');
+		// Vérification des champs
+		F3::call('outils::verif_individu_id');
+		if (!F3::exists('message')) {
+			if(!is_numeric($acces_id)) $acces_id = 0;
+			// Pas d'erreur, enregistrement de la MAJ
+			$acces=new Axon('acces');
+			$acces->load("id=$acces_id");
+			//$acces->individu_id=F3::get("REQUEST.individu_id");
+			//$acces->acces_type_id=F3::get("REQUEST.acces_type_id");
+			$acces->copyFrom('REQUEST'); //bug
+			//print_r(F3::get("REQUEST"));
+			$acces->save();
 
-	return "Aucune";
-}
-
-static function tickets_individu($individu_id) {
-	$festival_id = F3::get('SESSION.festival_id');
-
-	// Si pas de bypass dans la bdd
-	DB::sql("SELECT libelle FROM tickets WHERE tickets.individu_id = $individu_id AND tickets.festival_id = $festival_id;");
-	if(count(F3::get('DB')->result)>0){
-		$retour = "";
-		foreach (F3::get('DB')->result as $row){
-			$retour .= $row['libelle'].'<br>';
+			historique::logger("Édition de l'accès numéro $acces_id");
+			F3::reroute('/acces');
 		}
-		return $retour;
+		// Ré-Affichage du formulaire
+		F3::call('acces::editer');
 	}
-	//DB::sql("SELECT count(id) as count FROM `historique_organismes` WHERE `historique_organismes`.responsable = 1 AND `historique_organismes`.individu_id = $individu_id AND `historique_organismes`.festival_id = $festival_id;");
-	//if(F3::get('DB')->result[0]['count'] > 0)
-	DB::sql("SELECT `acces_types`.libelle FROM `acces_types`, `acces` WHERE `acces`.individu_id = $individu_id AND `acces`.acces_type_id = `acces_types`.id;");
-	//print_r(F3::get('DB')->result[0]['libelle']);
-	if(count(F3::get('DB')->result)>0)
-	if(F3::get('DB')->result[0]['libelle'] == "Badge")
-	return 0;
 
-	DB::sql("SELECT count(`affectations`.id) as count FROM `affectations`, `vacations`, `festivals_jours` WHERE vacations.festival_jour_id = `festivals_jours`.id AND `affectations`.vacation_id = vacations.id AND `affectations`.individu_id = $individu_id AND `festivals_jours`.festival_id = $festival_id;");
+	static function entrees() {
 
-	return 3 * F3::get('DB')->result[0]['count'];
-}
+		F3::call('outils::verif_operateur');
+		$festival_id = F3::get('SESSION.festival_id');
 
-static function acces_profil_post() {
+		$sql_acces_remis = DB::sql("SELECT COUNT(*) AS nb_acces_remis FROM historique_organismes WHERE `present` = 1 AND `festival_id` = $festival_id;");
+		F3::set('nb_acces_remis', $sql_acces_remis[0]["nb_acces_remis"]);
+
+		$codebarres = F3::get('REQUEST.codebarres');//TODO vérif du checksum
+		$present = F3::get('REQUEST.present');
+		$individu_id = F3::get('REQUEST.individu_id');
+		
+		if($present != "")
+		{
+			DB::sql("UPDATE `historique_organismes` SET `present` = 1 WHERE `individu_id` = $individu_id AND `festival_id` = $festival_id;");
+			F3::set('succes','Enregistré');
+		}
+		else
+		{
+			if($codebarres == "")
+			{
+				F3::set('message','Veuillez scanner un code barre');
+			}
+			else if(!is_numeric($codebarres))
+			{
+				F3::set('message','Code barres incorrect');
+			}
+			else if(strlen($codebarres) != 13){
+				F3::set('PARAMS.id',$codebarres);
+			}
+			else
+			{
+				$individu_id = substr($codebarres, 0, -1);
+				F3::set('PARAMS.id',$individu_id);
+			}
+		}
+
+		F3::set('acces',1);
+		F3::call('profils::afficher');
+	}
 
 
-}
+	static function present($individu_id, $festival_id) {
+		if ($festival_id == "") $festival_id = F3::get('SESSION.festival_id');
+		DB::sql("SELECT `present` FROM `historique_organismes` WHERE `individu_id` = $individu_id AND `festival_id` = $festival_id;");
+		if(F3::get('DB')->result[0]['present'] == 1)
+		return "oui";
+		else
+		return "non";
+	}
+
+
+	static function acces_profil() {
+
+	}
+
+	static function autorisation_individu($individu_id) {
+		$festival_id = F3::get('SESSION.festival_id');
+
+		// Si pas de bypass dans la bdd
+		// Si responsable alors badge
+		// Sinon bracelet bénévole
+
+
+		// Si pas de bypass dans la bdd
+		DB::sql("SELECT libelle FROM `acces_types`, `acces` WHERE acces.acces_type_id=acces_types.id AND `acces`.individu_id = $individu_id AND `acces_types`.festival_id = $festival_id;");
+		if(count(F3::get('DB')->result)>0){
+			$retour = "";
+			foreach (F3::get('DB')->result as $row){
+				$retour .= $row['libelle'].'<br>';
+			}
+			return $retour;
+		}
+		DB::sql("SELECT count(id) as count FROM `historique_organismes` WHERE `historique_organismes`.responsable = 1 AND `historique_organismes`.individu_id = $individu_id AND `historique_organismes`.festival_id = $festival_id;");
+		if(F3::get('DB')->result[0]['count'] > 0)
+		return "Bracelet bénévole";
+
+		DB::sql("SELECT count(`affectations`.id) as count FROM `affectations`, `vacations`, `festivals_jours` WHERE vacations.festival_jour_id = `festivals_jours`.id AND `affectations`.vacation_id = vacations.id AND `affectations`.individu_id = $individu_id AND `festivals_jours`.festival_id = $festival_id;");
+		if(F3::get('DB')->result[0]['count'] > 0)
+		return "Bracelet bénévole";
+
+		return "Aucune";
+	}
+
+	static function tickets_individu($individu_id) {
+		$festival_id = F3::get('SESSION.festival_id');
+
+		// Si pas de bypass dans la bdd
+		DB::sql("SELECT libelle FROM tickets WHERE tickets.individu_id = $individu_id AND tickets.festival_id = $festival_id;");
+		if(count(F3::get('DB')->result)>0){
+			$retour = "";
+			foreach (F3::get('DB')->result as $row){
+				$retour .= $row['libelle'].'<br>';
+			}
+			return $retour;
+		}
+		//DB::sql("SELECT count(id) as count FROM `historique_organismes` WHERE `historique_organismes`.responsable = 1 AND `historique_organismes`.individu_id = $individu_id AND `historique_organismes`.festival_id = $festival_id;");
+		//if(F3::get('DB')->result[0]['count'] > 0)
+		DB::sql("SELECT `acces_types`.libelle FROM `acces_types`, `acces` WHERE `acces`.individu_id = $individu_id AND `acces`.acces_type_id = `acces_types`.id;");
+		//print_r(F3::get('DB')->result[0]['libelle']);
+		if(count(F3::get('DB')->result)>0)
+		if(F3::get('DB')->result[0]['libelle'] == "Badge")
+		return 0;
+
+		DB::sql("SELECT count(`affectations`.id) as count FROM `affectations`, `vacations`, `festivals_jours` WHERE vacations.festival_jour_id = `festivals_jours`.id AND `affectations`.vacation_id = vacations.id AND `affectations`.individu_id = $individu_id AND `festivals_jours`.festival_id = $festival_id;");
+
+		return 3 * F3::get('DB')->result[0]['count'];
+	}
+
+	static function acces_profil_post() {
+
+
+	}
 }
 ?>
