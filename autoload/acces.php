@@ -170,7 +170,7 @@ class Acces {
 			$acces->save();
 			$acces_id = $acces->_id;
 			historique::logger("Création de l'accès particulier $acces_id");
-			//F3::reroute('/acces');
+			F3::reroute('/acces');
 		}
 		// Ré-Affichage du formulaire
 		F3::call('acces::ajouter');
