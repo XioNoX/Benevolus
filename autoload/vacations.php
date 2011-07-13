@@ -285,12 +285,12 @@ class Vacations {
 		F3::call('outils::verif_responsable');
 		$festival_id = F3::get('SESSION.festival_id');
 		$vacation_id = F3::get('PARAMS.id');
-		
+
 		if(is_numeric($vacation_id))
-		{	
+		{
 			$vacation=new Axon('vacations');
 			$vacation->load("id=$vacation_id");
-		
+
 			if (!$vacation->dry()) {
 				$vacation->copyTo('REQUEST');
 
@@ -681,83 +681,91 @@ class Vacations {
 				$pdf->titre = "Emargement " . $lieu->libelle . " " . $festival->annee;
 
 				//Lister les vacations du lieu
+				$jour_id = F3::get("REQUEST.jour_id");
+				if($jour_id != "")
+				$vacations = DB::sql("SELECT * FROM vacations WHERE lieu_id=$lieu_id AND festival_jour_id=$jour_id");
+				else
 				$vacations = DB::sql("SELECT * FROM vacations WHERE lieu_id=$lieu_id");
 
-				foreach ($vacations as $vacation) {
-					$vacation_id = $vacation["id"];
+				if( count($vacations) > 0)
+				{
+					foreach ($vacations as $vacation) {
+						$vacation_id = $vacation["id"];
 
-					$festival_jour_id = $vacation["festival_jour_id"];
-					$festivals_jours = new Axon('festivals_jours');
-					$festivals_jours->load("id=$festival_jour_id");
+						$festival_jour_id = $vacation["festival_jour_id"];
+						$festivals_jours = new Axon('festivals_jours');
+						$festivals_jours->load("id=$festival_jour_id");
 
-					$pdf->header = true;
-					$pdf->barcode = $vacation_id;
+						$pdf->header = true;
+						$pdf->barcode = $vacation_id;
 
-					$pdf->AddPage();
+						$pdf->AddPage();
 
-					$responsable = DB::sql("SELECT i.photo, i.nom AS nom_individu, i.prenom, i.adresse1, i.adresse2, vi.cp, vi.nom AS nom_ville FROM individus AS i, villes AS vi, vacations AS va WHERE va.id=$vacation_id AND va.responsable_id=i.id AND i.ville_id=vi.id");
-					if (count($responsable)>0)
-					{
-						$pdf->SetFont('Arial','B',14);
-						$pdf->Cell(25);
-						$pdf->Cell(0,6,"Responsable :",0,1, 'L');
-
-						$pdf->SetFont('Arial','',14);
-
-						if ($responsable[0]['photo'] != NULL)
-						$pdf->Image("uploads/photos/". $responsable[0]['photo'] ,15,49,null,30);
-
-						$pdf->Cell(25);
-						$pdf->Cell(0,6,$responsable[0]['nom_individu'] . " " . $responsable[0]['prenom'] ,0,1, 'L');
-
-						if ($responsable[0]['adresse1'] != NULL)
+						$responsable = DB::sql("SELECT i.photo, i.nom AS nom_individu, i.prenom, i.adresse1, i.adresse2, vi.cp, vi.nom AS nom_ville FROM individus AS i, villes AS vi, vacations AS va WHERE va.id=$vacation_id AND va.responsable_id=i.id AND i.ville_id=vi.id");
+						if (count($responsable)>0)
 						{
+							$pdf->SetFont('Arial','B',14);
 							$pdf->Cell(25);
-							$pdf->Cell(0,6,$responsable[0]['adresse1'],0,1, 'L');
-						}
-						if ($responsable[0]['adresse2'] != NULL)
-						{
+							$pdf->Cell(0,6,"Responsable :",0,1, 'L');
+
+							$pdf->SetFont('Arial','',14);
+
+							if ($responsable[0]['photo'] != NULL)
+							$pdf->Image("uploads/photos/". $responsable[0]['photo'] ,15,49,null,30);
+
 							$pdf->Cell(25);
-							$pdf->Cell(0,6,$responsable[0]['adresse2'],0,1, 'L');
+							$pdf->Cell(0,6,$responsable[0]['nom_individu'] . " " . $responsable[0]['prenom'] ,0,1, 'L');
+
+							if ($responsable[0]['adresse1'] != NULL)
+							{
+								$pdf->Cell(25);
+								$pdf->Cell(0,6,$responsable[0]['adresse1'],0,1, 'L');
+							}
+							if ($responsable[0]['adresse2'] != NULL)
+							{
+								$pdf->Cell(25);
+								$pdf->Cell(0,6,$responsable[0]['adresse2'],0,1, 'L');
+							}
+
+							$pdf->Cell(25);
+							$pdf->Cell(0,6,$responsable[0]['cp'] . " " . $responsable[0]['nom_ville'],0,1, 'L');
 						}
 
-						$pdf->Cell(25);
-						$pdf->Cell(0,6,$responsable[0]['cp'] . " " . $responsable[0]['nom_ville'],0,1, 'L');
+						$pdf->Line(140,40,140,65);
+
+						//Données SQL
+						$data = DB::sql("SELECT i.id AS id, i.nom AS nom_individu, i.prenom, o.libelle, '' AS debut, '' AS signature1, '' AS fin, '' AS signature2 FROM vacations AS va, individus AS i, affectations AS a, organismes AS o, historique_organismes AS ho WHERE va.id = $vacation_id AND ho.festival_id = $festival_id AND ho.individu_id = i.id AND o.id = ho.organisme_id AND i.id = a.individu_id AND a.vacation_id = va.id ORDER BY i.nom;");
+
+						//Décalage à droite
+						$pdf->SetY(40);
+
+						$pdf->Cell(150);
+						$pdf->Cell(0,6,$vacation["libelle"] . " (ID:" . $vacation_id . ")" ,0,1, 'L');
+						$pdf->Cell(150);
+						$pdf->Cell(0,6,"Date : " . outils::date_sql_fr($festivals_jours->jour),0,1, 'L');
+						$pdf->Cell(150);
+						$pdf->Cell(0,6,"Heure debut : " . outils::date_sql_timepicker($vacation["heure_debut"]) . " - Heure fin : " . outils::date_sql_timepicker($vacation["heure_fin"]),0,1, 'L');
+						$pdf->Cell(150);
+						$pdf->Cell(0,6,"# personnes : " . count($data),0,1, 'L');
+
+						$pdf->Ln(8);
+
+						//Titres des colonnes
+						$header=array('ID','Nom','Prenom','Association','Debut','Signature','Fin','Signature');
+						//Largeur des colonnes
+						$w=array(16,40,40,90,20,30,20,30);
+						//Titre des colonnes SQL
+						$header2=array('id','nom_individu','prenom','libelle','debut','signature1','fin','signature2');
+						//Grande taille pour signature
+						$pdf->cellule_haute = true;
+						//Affichage des données
+						$pdf->FancyTable($header,$data,$header2,$w);
 					}
+					$pdf->Output("Emargement-".$vacation_id."-".$festival->annee.".pdf", 'D');
 
-					$pdf->Line(140,40,140,65);
-
-					//Données SQL
-					$data = DB::sql("SELECT i.id AS id, i.nom AS nom_individu, i.prenom, o.libelle, '' AS debut, '' AS signature1, '' AS fin, '' AS signature2 FROM vacations AS va, individus AS i, affectations AS a, organismes AS o, historique_organismes AS ho WHERE va.id = $vacation_id AND ho.festival_id = $festival_id AND ho.individu_id = i.id AND o.id = ho.organisme_id AND i.id = a.individu_id AND a.vacation_id = va.id ORDER BY i.nom;");
-
-					//Décalage à droite
-					$pdf->SetY(40);
-
-					$pdf->Cell(150);
-					$pdf->Cell(0,6,$vacation["libelle"] . " (ID:" . $vacation_id . ")" ,0,1, 'L');
-					$pdf->Cell(150);
-					$pdf->Cell(0,6,"Date : " . outils::date_sql_fr($festivals_jours->jour),0,1, 'L');
-					$pdf->Cell(150);
-					$pdf->Cell(0,6,"Heure debut : " . outils::date_sql_timepicker($vacation["heure_debut"]) . " - Heure fin : " . outils::date_sql_timepicker($vacation["heure_fin"]),0,1, 'L');
-					$pdf->Cell(150);
-					$pdf->Cell(0,6,"# personnes : " . count($data),0,1, 'L');
-
-					$pdf->Ln(8);
-
-					//Titres des colonnes
-					$header=array('ID','Nom','Prenom','Association','Debut','Signature','Fin','Signature');
-					//Largeur des colonnes
-					$w=array(16,40,40,90,20,30,20,30);
-					//Titre des colonnes SQL
-					$header2=array('id','nom_individu','prenom','libelle','debut','signature1','fin','signature2');
-					//Grande taille pour signature
-					$pdf->cellule_haute = true;
-					//Affichage des données
-					$pdf->FancyTable($header,$data,$header2,$w);
 				}
-
-				$pdf->Output("Emargement-".$vacation_id."-".$festival->annee.".pdf", 'D');
-
+				else
+				echo "Aucune vacation pour le lieu ou la période selectionnée";
 			}
 			else
 			Outils::http401();

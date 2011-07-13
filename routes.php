@@ -121,6 +121,7 @@ F3::route('GET /vacations/imprimer/lieu/@id', 'vacations::imprimer_vacations_lie
 F3::route('GET /vacations/imprimer/domaine/@id', 'vacations::imprimer_vacations_domaine');
 F3::route('GET /vacations/imprimer/emargement/@id', 'vacations::imprimer_emargement_vacation');
 F3::route('GET /vacations/imprimer/emargement/lieu/@id', 'vacations::imprimer_emargement_lieu');
+F3::route('POST /vacations/imprimer/emargement/lieu/@id', 'vacations::imprimer_emargement_lieu');
 F3::route('GET /vacations/imprimer/emargement/domaine/@id', 'vacations::imprimer_emargement_domaine');
 
 F3::route('GET /disponibilites/gerer','disponibilites::gerer');

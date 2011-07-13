@@ -1,7 +1,7 @@
 <?php
 class Lieux {
-static function lister() {
-    outils::activerJqgrid();
+	static function lister() {
+		outils::activerJqgrid();
 		F3::call('outils::menu');
 		F3::call('outils::verif_responsable');
 		F3::set('pagetitle','Liste de tous les lieux');
@@ -21,8 +21,8 @@ static function lister() {
 		F3::call('outils::generer');
 	}
 
-static function lister_festival() {
-    outils::activerJqgrid();
+	static function lister_festival() {
+		outils::activerJqgrid();
 		F3::call('outils::menu');
 		F3::call('outils::verif_responsable');
 		F3::set('pagetitle','Liste des lieux du festival courant');
@@ -41,65 +41,65 @@ static function lister_festival() {
 		F3::set('template','liste_generique1');
 		F3::call('outils::generer');
 	}
-	
 
-  static function editer_tableau_post() {
-      F3::set('type','lieu');
-      if(F3::get('REQUEST.oper') == "del")
-        $liste_ids = F3::get('REQUEST.id');
-          $tableau_ids = explode(',', $liste_ids);
-          foreach( $tableau_ids as $id) {  
-             if(is_numeric($id)){
-               $lieux=new Axon('lieux');
-			         $lieux->load("id=$id");			 
-               if(outils::est_admin()) 
-               {
-                 DB::sql("DELETE FROM lieux WHERE id=$id");
-                 historique::logger("Suppréssion du lieu ". $lieux->libelle);
 
-               }
-             }
-          }
-  }
+	static function editer_tableau_post() {
+		F3::set('type','lieu');
+		if(F3::get('REQUEST.oper') == "del")
+		$liste_ids = F3::get('REQUEST.id');
+		$tableau_ids = explode(',', $liste_ids);
+		foreach( $tableau_ids as $id) {
+			if(is_numeric($id)){
+				$lieux=new Axon('lieux');
+				$lieux->load("id=$id");
+				if(outils::est_admin())
+				{
+					DB::sql("DELETE FROM lieux WHERE id=$id");
+					historique::logger("Suppréssion du lieu ". $lieux->libelle);
 
-  static function editer_tableau_festival_post() {
-      F3::set('type','lieu');
-      if(F3::get('REQUEST.oper') == "del")
-        $liste_ids = F3::get('REQUEST.id');
-	$festival_id = F3::get('SESSION.festival_id');
-	$individu_id = F3::get('SESSION.id');
-          $tableau_ids = explode(',', $liste_ids);
-          foreach( $tableau_ids as $id) {  
-             if(is_numeric($id)){
-               $lieux=new Axon('lieux');
-			         $lieux->load("id=$id");			 
-               if(outils::est_admin()) 
-               {
-DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :festival_id ;',array(':id'=>array($id,PDO::PARAM_INT),':festival_id'=>array($festival_id,PDO::PARAM_INT)));
-                 historique::logger("Suppréssion du lieu ". $lieux->libelle);
+				}
+			}
+		}
+	}
 
-               }
-             }
-          }
-  }
-  
+	static function editer_tableau_festival_post() {
+		F3::set('type','lieu');
+		if(F3::get('REQUEST.oper') == "del")
+		$liste_ids = F3::get('REQUEST.id');
+		$festival_id = F3::get('SESSION.festival_id');
+		$individu_id = F3::get('SESSION.id');
+		$tableau_ids = explode(',', $liste_ids);
+		foreach( $tableau_ids as $id) {
+			if(is_numeric($id)){
+				$lieux=new Axon('lieux');
+				$lieux->load("id=$id");
+				if(outils::est_admin())
+				{
+					DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :festival_id ;',array(':id'=>array($id,PDO::PARAM_INT),':festival_id'=>array($festival_id,PDO::PARAM_INT)));
+					historique::logger("Suppréssion du lieu ". $lieux->libelle);
+
+				}
+			}
+		}
+	}
+
 	static function recuperation_lieux()
 	{
 		$festival_id = F3::get('SESSION.festival_id');
 		$individu_id = F3::get('SESSION.id');
 
 		$lieux = DB::sql("SELECT DISTINCT l.id, l.libelle FROM individus AS i, affectations AS a, vacations AS v, lieux AS l, festivals_jours AS fj WHERE i.id=$individu_id AND a.individu_id=i.id AND v.id=a.vacation_id AND l.id=v.lieu_id AND v.festival_jour_id=fj.id AND fj.festival_id=$festival_id UNION SELECT l.id, l.libelle FROM responsables_lieux AS rl, lieux AS l WHERE rl.individu_id=$individu_id AND rl.festival_id=$festival_id AND rl.lieu_id=l.id");
-		
+
 		if(count($lieux)>0)
 		{
-			F3::set('lieux', $lieux);			
+			F3::set('lieux', $lieux);
 		}
 	}
-	
-	static function membres_lieu($lieu_id, $festival_id){	
+
+	static function membres_lieu($lieu_id, $festival_id){
 		if ($festival_id == "") $festival_id = F3::get('SESSION.festival_id');
-  		DB::sql("SELECT DISTINCT i.* FROM individus AS i, affectations AS a, vacations as v WHERE i.id=a.individu_id AND a.vacation_id=v.id AND v.lieu_id=$lieu_id UNION SELECT i.* FROM individus AS i, responsables_lieux AS rl WHERE i.id=rl.individu_id AND rl.lieu_id=$lieu_id AND rl.festival_id=$festival_id");
-  		return F3::get('DB')->result;
+		DB::sql("SELECT DISTINCT i.* FROM individus AS i, affectations AS a, vacations as v WHERE i.id=a.individu_id AND a.vacation_id=v.id AND v.lieu_id=$lieu_id UNION SELECT i.* FROM individus AS i, responsables_lieux AS rl WHERE i.id=rl.individu_id AND rl.lieu_id=$lieu_id AND rl.festival_id=$festival_id");
+		return F3::get('DB')->result;
 	}
 
 	static function ajax_responsable() {
@@ -107,8 +107,8 @@ DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :f
 		$festival_id = F3::get('SESSION.festival_id');
 		$id = F3::get('PARAMS.id');
 
-      DB::sql("SELECT individu_id, nom, prenom, date_naissance FROM responsables_lieux, individus WHERE responsables_lieux.individu_id = individus.id AND festival_id = $festival_id AND lieu_id = $id;");
-      $result = F3::get('DB')->result[0];
+		DB::sql("SELECT individu_id, nom, prenom, date_naissance FROM responsables_lieux, individus WHERE responsables_lieux.individu_id = individus.id AND festival_id = $festival_id AND lieu_id = $id;");
+		$result = F3::get('DB')->result[0];
 
 		echo $result['individu_id'] . ';'. $result['prenom'] . " " . $result['nom'] . " - " . $result['date_naissance'];
 	}
@@ -116,7 +116,7 @@ DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :f
 	static function mes_lieux() {
 		F3::call('outils::menu');
 		F3::call('outils::verif_individu');
-		
+
 		F3::set('meslieux', 1);
 		F3::call('lieux::recuperation_lieux');
 
@@ -124,7 +124,7 @@ DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :f
 		F3::set('template','lieu');
 		F3::call('outils::generer');
 	}
-	
+
 	static function mon_lieu() {
 		F3::call('outils::menu');
 		F3::call('outils::verif_individu');
@@ -132,27 +132,27 @@ DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :f
 		$festival_id = F3::get('SESSION.festival_id');
 		$individu_id = F3::get('SESSION.id');
 		$lieu_id = F3::get('PARAMS.id');
-				
+
 		$lieu_individu = DB::sql("Select lieux.* FROM individus, affectations, vacations, lieux WHERE individus.id=$individu_id AND affectations.individu_id=individus.id AND vacations.id=affectations.vacation_id AND lieux.id=vacations.lieu_id AND lieux.id=$lieu_id UNION SELECT lieux.* FROM responsables_lieux, lieux WHERE responsables_lieux.lieu_id=$lieu_id AND responsables_lieux.lieu_id=lieux.id AND responsables_lieux.festival_id=$festival_id");
 			
 		//Vérification de l'appartenance au lieu
 		if(count($lieu_individu)>0)
 		{
 			F3::set('lieu', $lieu_individu);
-			
+
 			//Récupération du responsable
 			$responsable_lieu = DB::sql("SELECT i.id, nom, prenom FROM individus AS i, responsables_lieux AS rl WHERE i.id=rl.individu_id AND rl.lieu_id=$lieu_id AND rl.festival_id=$festival_id");
-			
+
 			if(count($responsable_lieu)>0)
 			{
 				F3::set('responsable', $responsable_lieu);
-				
+
 				if ( $responsable_lieu[0]['id'] == $individu_id )
 				{
 					F3::set('estResponsable', 1);
 				}
 			}
-			
+
 			//Affichage de tous les membres dans la liste
 			$membres_lieu = DB::sql("SELECT DISTINCT individus.id, individus.nom, individus.prenom FROM individus, affectations, vacations, lieux, festivals_jours WHERE affectations.individu_id=individus.id AND vacations.id=affectations.vacation_id AND lieux.id=vacations.lieu_id AND lieux.id=$lieu_id AND vacations.festival_jour_id=festivals_jours.id AND festivals_jours.festival_id=$festival_id");
 			if(count($membres_lieu)>0)
@@ -168,18 +168,18 @@ DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :f
 	}
 
 	static function ajouter() {
-    outils::activerJquery();
+		outils::activerJquery();
 		F3::call('outils::menu');
 		F3::call('outils::verif_admin');
 		$festival_id = F3::get('SESSION.festival_id');
-    	DB::sql("SELECT domaines.id, libelle FROM domaines, responsables_domaines WHERE domaines.id = responsables_domaines.domaine_id AND responsables_domaines.festival_id = $festival_id ORDER BY libelle;");
+		DB::sql("SELECT domaines.id, libelle FROM domaines, responsables_domaines WHERE domaines.id = responsables_domaines.domaine_id AND responsables_domaines.festival_id = $festival_id ORDER BY libelle;");
 		F3::set('domaines',F3::get('DB')->result);
 		F3::set('pagetitle','Ajouter un lieu');
 		F3::set('template','form_lieux');
 		F3::call('outils::generer');
 	}
 
-	static function ajouter_post() { 
+	static function ajouter_post() {
 		F3::call('outils::verif_admin');
 		// Suppression d'un éventuel précédent message d'erreur
 		F3::clear('message');
@@ -198,7 +198,7 @@ DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :f
 			$resp_lieux->lieu_id= $lieux_id;
 			$resp_lieux->individu_id= F3::get('REQUEST.responsable_id');
 			$resp_lieux->save();
-      historique::logger("Création du lieu numéro $lieux_id");
+			historique::logger("Création du lieu numéro $lieux_id");
 			// Retour à la liste des festivals. Le nouveau festival doit être présent
 			F3::reroute('/lieux');
 		}
@@ -207,11 +207,11 @@ DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :f
 	}
 
 	static function editer() {
-    outils::activerJqgrid();
+		outils::activerJqgrid();
 		F3::set('type','lieu');
 		F3::call('outils::menu');
 		F3::call('outils::verif_responsable');
-		
+
 		$festival_id = F3::get('SESSION.festival_id');
 		$id = F3::get('PARAMS.id');
 
@@ -219,21 +219,25 @@ DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :f
 		$lieux->load("id=$id");
 		if (!$lieux->dry() && is_numeric($id) ) {
 			$lieux->copyTo('REQUEST');
-      
-		  DB::sql("SELECT domaines.id, libelle FROM domaines, responsables_domaines WHERE domaines.id = responsables_domaines.domaine_id AND responsables_domaines.festival_id = $festival_id ORDER BY libelle;");
-		  F3::set('domaines',F3::get('DB')->result);
 
-      DB::sql("SELECT individu_id FROM responsables_lieux WHERE festival_id = $festival_id AND lieu_id = $id;");
-      $result = F3::get('DB')->result;
-      if(!isset($result[0]))$responsable_id=0;
-        else
-      $responsable_id = $result[0]['individu_id']; //A modifier si plusieurs responsables
-      F3::set('REQUEST.responsable_id',$responsable_id);
-      if ($responsable_id != '') {
-        $individus=new Axon('individus');
-        $individus->load("id=$responsable_id");
-        F3::set('REQUEST.responsable', $individus->prenom . ' ' . $individus->nom . ' - ' . outils::date_sql_fr($individus->date_naissance));
-      }
+			DB::sql("SELECT domaines.id, libelle FROM domaines, responsables_domaines WHERE domaines.id = responsables_domaines.domaine_id AND responsables_domaines.festival_id = $festival_id ORDER BY libelle;");
+			F3::set('domaines',F3::get('DB')->result);
+
+			DB::sql("SELECT individu_id FROM responsables_lieux WHERE festival_id = $festival_id AND lieu_id = $id;");
+			$result = F3::get('DB')->result;
+			if(!isset($result[0]))$responsable_id=0;
+			else
+			$responsable_id = $result[0]['individu_id']; //A modifier si plusieurs responsables
+			F3::set('REQUEST.responsable_id',$responsable_id);
+			if ($responsable_id != '') {
+				$individus=new Axon('individus');
+				$individus->load("id=$responsable_id");
+				F3::set('REQUEST.responsable', $individus->prenom . ' ' . $individus->nom . ' - ' . outils::date_sql_fr($individus->date_naissance));
+			}
+				
+			$jours = DB::sql("SELECT id, jour FROM festivals_jours WHERE festival_id = $festival_id");
+			if (count($jours) > 0)
+			F3::set('jours', $jours);
 
 			F3::set('pagetitle','Editer un lieu');
 			F3::set('editer','editer');
@@ -271,7 +275,7 @@ DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :f
 			$resp_lieux->individu_id= F3::get('REQUEST.responsable_id');
 			$resp_lieux->save();
 			// Retour à la liste des festivals. Le nouveau festival doit être présent
-      historique::logger("Édition du lieu numéro $lieu_id");
+			historique::logger("Édition du lieu numéro $lieu_id");
 			F3::reroute('/lieux');
 		}
 		// Ré-Affichage du formulaire
@@ -279,10 +283,10 @@ DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :f
 	}
 
 	static function suppr_vacation() {
-  }
+	}
 
 	static function ajouter_vacation() {
-  }
+	}
 
 
 	static function afficher() {
@@ -340,20 +344,20 @@ DB::sql('DELETE FROM responsables_lieux WHERE lieu_id = :id AND festival_id = :f
 
 
 	static function est_responsable() {
-    $festival_id = F3::get('SESSION.festival_id');
-    $individu_id = F3::get('SESSION.id');
-    if(!isset($individu_id) || !isset($festival_id)) return false;
-    $lieu_id = F3::get('PARAMS.id');
-    if(!is_numeric($lieu_id)) return false;
-    DB::sql("SELECT domaine_id FROM lieux WHERE id = $lieu_id;");
-	  $result = F3::get('DB')->result;
+		$festival_id = F3::get('SESSION.festival_id');
+		$individu_id = F3::get('SESSION.id');
+		if(!isset($individu_id) || !isset($festival_id)) return false;
+		$lieu_id = F3::get('PARAMS.id');
+		if(!is_numeric($lieu_id)) return false;
+		DB::sql("SELECT domaine_id FROM lieux WHERE id = $lieu_id;");
+		$result = F3::get('DB')->result;
 		$domaine_id = $result[0]['domaine_id'];
 		DB::sql("SELECT COUNT(id) as count FROM responsables_domaines WHERE individu_id = $individu_id AND festival_id = $festival_id AND domaine_id = $domaine_id;");
-    $result = F3::get('DB')->result;
-	  $count = $result[0]['count'];						
-    if($result[0]['count'] == 1) return true;
-    return false;
-  }
+		$result = F3::get('DB')->result;
+		$count = $result[0]['count'];
+		if($result[0]['count'] == 1) return true;
+		return false;
+	}
 
 
 

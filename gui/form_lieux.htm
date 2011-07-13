@@ -12,178 +12,234 @@
 </style>
 
 <h3>{{@pagetitle}}</h3>
-<form name="lieux" method="post" action="{{@PARAMS.0}}"><F3:check
-	if="{{@message}}">
+<form name="lieux" method="post" action="{{@PARAMS.0}}">
+	<F3:check if="{{@message}}">
+		<F3:true>
+			<p class="fail">{{@message}}</p>
+		</F3:true>
+	</F3:check>
+
+	<dl>
+		<dt>
+			<label for="libelle">Libelle</label>
+		</dt>
+		<dd>
+			<input type="text" name="libelle" id="libelle"
+				value="{{@REQUEST.libelle}}" required />
+		</dd>
+
+		<dt>Domaine</dt>
+		<dd>
+			<F3:check if="{{@domaines}}">
+				<F3:true>
+					<select name="domaine_id" id="select_domaine">
+						<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@domaines}}">
+							<F3:check if="{{@REQUEST.domaine_id == @item.id}}">
+								<F3:true>
+									<option value="{{@item.id}}" selected>{{@item.libelle}}</option>
+								</F3:true>
+								<F3:false>
+									<option value="{{@item.id}}">{{@item.libelle}}</option>
+								</F3:false>
+							</F3:check>
+						</F3:repeat>
+					</select>
+			</F3:check>
+		</dd>
+
+		<F3:check if="{{@SESSION.acces_web >= @acces_operateur}}">
+			<F3:true>
+				<dt>
+					<label for="responsable">Responsable</label>
+				</dt>
+				<dd>
+					<input type="text" name="responsable" id="responsable"
+						value="{{@REQUEST.responsable}}"
+						onkeypress="handleEnter(this, event)" required />
+				</dd>
+				<dd>
+					<input type="hidden" name="responsable_id" id="responsable_id"
+						value="{{@REQUEST.responsable_id}}" />
+				</dd>
+			</F3:true>
+		</F3:check>
+		<dd>
+			<input type="submit" name="submit" value="Valider" />
+		</dd>
+	</dl>
+</form>
+<F3:check if="{{@editer}}">
 	<F3:true>
-		<p class="fail">{{@message}}</p>
+		<p>Vacations :</p>
+		<table id="listeVacations"></table>
+		<div id="pagerVacations"></div>
+		<div id="filter" style="margin-left: 30%; display: none">recherche</div>
+
+		<a href="/vacations/imprimer/emargement/lieu/{{@REQUEST.id}}">Imprimer
+			les feuilles d'emargement du lieu</a>
+  | <a href="/vacations/imprimer/emargement/lieu/{{@REQUEST.id}}/">Imprimer
+			les feuilles d'emargement du lieu</a>
+
+		<form method="POST" action="/vacations/imprimer/emargement/lieu/{{@REQUEST.id}}"
+			style="display: inline;">
+						
+			<select name="jour_id" id="select_domaine">
+				
+				<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@jours}}">
+					<option value="{{@item.id}}" selected>{{date('d/m/Y',strtotime(@item.jour))}}</option>
+				</F3:repeat>
+				
+			</select> 
+			<input type="submit" value="Valider" />
+		</form>
+
+|
+<a href="/vacations/imprimer/lieu/{{@REQUEST.id}}">Imprimer les
+			affectations des membres de ce lieu</a>
+
 	</F3:true>
 </F3:check>
 
-<dl>
-	<dt><label for="libelle">Libelle</label></dt>
-	<dd><input type="text" name="libelle" id="libelle"
-		value="{{@REQUEST.libelle}}" required /></dd>
-
-	<dt>Domaine</dt>
-	<dd><F3:check if="{{@domaines}}">
-		<F3:true>
-      <select name="domaine_id" id="select_domaine">
-			<F3:repeat key="{{@key}}" value="{{@item}}" group="{{@domaines}}">
-            <F3:check if="{{@REQUEST.domaine_id == @item.id}}">
-            <F3:true>
-             <option value="{{@item.id}}" selected>{{@item.libelle}}</option> 
-            </F3:true>
-            <F3:false>
-              <option value="{{@item.id}}">{{@item.libelle}}</option>
-            </F3:false>
-        </F3:check>
-			</F3:repeat>
-      </select>
-</F3:check></dd>
-
-	<F3:check if="{{@SESSION.acces_web >= @acces_operateur}}">
-		<F3:true>
-			<dt><label for="responsable">Responsable</label></dt>
-			<dd><input type="text" name="responsable" id="responsable"
-				value="{{@REQUEST.responsable}}"
-				onkeypress="handleEnter(this, event)"
-				required /></dd>
-			<dd><input type="hidden" name="responsable_id"
-				id="responsable_id" value="{{@REQUEST.responsable_id}}" /></dd>
-		</F3:true>
-	</F3:check>
-	<dd><input type="submit" name="submit" value="Valider" /></dd>
-</dl>
-</form>
-<F3:check if="{{@editer}}">
-  <F3:true>
-  <p>Vacations :</p>
-  <table id="listeVacations"></table> 
-  <div id="pagerVacations"></div> 
-  <div id="filter" style="margin-left:30%;display:none">recherche</div>
-    
-  <a href="/vacations/imprimer/emargement/lieu/{{@REQUEST.id}}">Imprimer les feuilles d'emargement du lieu</a>
-  | <a href="/vacations/imprimer/lieu/{{@REQUEST.id}}">Imprimer les affectations des membres de ce lieu</a>
-  
-  </F3:true>
-</F3:check>
-
 <script type="text/javascript">
+	function IsNumeric(strString)
+	//  check for valid numeric strings	
+	{
+		var strValidChars = "0123456789";
+		var strChar;
+		var blnResult = true;
 
-function IsNumeric(strString)
-//  check for valid numeric strings	
-{
-var strValidChars = "0123456789";
-var strChar;
-var blnResult = true;
+		if (strString.length == 0)
+			return false;
 
-if (strString.length == 0) return false;
-
-//  test strString consists of valid characters listed above
-for (i = 0; i < strString.length && blnResult == true; i++)
-   {
-   strChar = strString.charAt(i);
-   if (strValidChars.indexOf(strChar) == -1)
-      {
-      blnResult = false;
-      }
-   }
-return blnResult;
-}
-
-$("#select_domaine").change(function () {
-	responsable_de_domaine();
-});
-
-function responsable_de_domaine() {
-	var select_domaine = document.getElementById("select_domaine");
-	var id_domaine = select_domaine.options[select_domaine.selectedIndex].value;
-	$.ajax({
-		   type: "POST",
-		   url: "/domaines/" + id_domaine + "/responsable",
-		   data: "id="+id_domaine,
-		   success: function(retour_ajax){
-		var retour_ajax_tab = retour_ajax.split(";");
-		
-		if (IsNumeric(retour_ajax_tab[0])){
-		document.getElementById('responsable_id').value = retour_ajax_tab[0];
-		document.getElementById('responsable').value = retour_ajax_tab[1];
+		//  test strString consists of valid characters listed above
+		for (i = 0; i < strString.length && blnResult == true; i++) {
+			strChar = strString.charAt(i);
+			if (strValidChars.indexOf(strChar) == -1) {
+				blnResult = false;
+			}
 		}
-		   }
-		 });
-}
+		return blnResult;
+	}
 
-function handleEnter(inField, e) {
-    var charCode;
-    
-    if(e && e.which){
-        charCode = e.which;
-    }else if(window.event){
-        e = window.event;
-        charCode = e.keyCode;
-    }
+	$("#select_domaine").change(function() {
+		responsable_de_domaine();
+	});
 
-    if(charCode != 13) {
-    	onkeypress="javascript:document.getElementById('responsable_id').value = 0;"
-    }
-}
+	function responsable_de_domaine() {
+		var select_domaine = document.getElementById("select_domaine");
+		var id_domaine = select_domaine.options[select_domaine.selectedIndex].value;
+		$
+				.ajax({
+					type : "POST",
+					url : "/domaines/" + id_domaine + "/responsable",
+					data : "id=" + id_domaine,
+					success : function(retour_ajax) {
+						var retour_ajax_tab = retour_ajax.split(";");
 
+						if (IsNumeric(retour_ajax_tab[0])) {
+							document.getElementById('responsable_id').value = retour_ajax_tab[0];
+							document.getElementById('responsable').value = retour_ajax_tab[1];
+						}
+					}
+				});
+	}
 
+	function handleEnter(inField, e) {
+		var charCode;
 
-$(function(){
-  var mygrid = jQuery("#listeVacations").jqGrid({
-   scroll: 1,
-    url:'/ajax/vacations/lieux/{{@PARAMS.id}}',
-    datatype: 'json',
-    mtype: 'GET',
-    //width: '100%',
-    autowidth: true,
-    height: '100%',
-    colNames: ['id','Libelle', 'heure debut', 'heure fin', 'nombre minimum', 'nombre maximum', 'Jour', 'Responsable'],
-    colModel :[{name:'id', index:'id', width:45, formatter: formateadorLink},
-               {name:'libelle', index:'libelle', width:50},
-               {name:'heure_debut', index:'heure_debut'},
-               {name:'heure_fin', index:'heure_fin'},
-               {name:'nombre_minimum', index:'nombre_minimum'},
-               {name:'nombre_maximum', index:'nombre_maximum'},
-               {name:'jour', index:'jour'},
-               {name:'prenomnom', index:'prenomnom'}],
-    pager: '#pagerVacations',
-    sortname: 'jour',
-    sortorder: 'asc',
-    viewrecords: true,
-    gridview : true,
-    multiselect: true,
-  editurl: "/vacations/editer"
-  }); 
+		if (e && e.which) {
+			charCode = e.which;
+		} else if (window.event) {
+			e = window.event;
+			charCode = e.keyCode;
+		}
 
-jQuery("#listeVacations").jqGrid('navGrid','#pagerVacations',{edit:false,add:false,del:true,search:false,refresh:false});
+		if (charCode != 13) {
+			onkeypress = "javascript:document.getElementById('responsable_id').value = 0;"
+		}
+	}
 
-jQuery("#listeVacations").jqGrid('filterToolbar');
+	$(function() {
+		var mygrid = jQuery("#listeVacations").jqGrid(
+				{
+					scroll : 1,
+					url : '/ajax/vacations/lieux/{{@PARAMS.id}}',
+					datatype : 'json',
+					mtype : 'GET',
+					//width: '100%',
+					autowidth : true,
+					height : '100%',
+					colNames : [ 'id', 'Libelle', 'heure debut', 'heure fin',
+							'nombre minimum', 'nombre maximum', 'Jour',
+							'Responsable' ],
+					colModel : [ {
+						name : 'id',
+						index : 'id',
+						width : 45,
+						formatter : formateadorLink
+					}, {
+						name : 'libelle',
+						index : 'libelle',
+						width : 50
+					}, {
+						name : 'heure_debut',
+						index : 'heure_debut'
+					}, {
+						name : 'heure_fin',
+						index : 'heure_fin'
+					}, {
+						name : 'nombre_minimum',
+						index : 'nombre_minimum'
+					}, {
+						name : 'nombre_maximum',
+						index : 'nombre_maximum'
+					}, {
+						name : 'jour',
+						index : 'jour'
+					}, {
+						name : 'prenomnom',
+						index : 'prenomnom'
+					} ],
+					pager : '#pagerVacations',
+					sortname : 'jour',
+					sortorder : 'asc',
+					viewrecords : true,
+					gridview : true,
+					multiselect : true,
+					editurl : "/vacations/editer"
+				});
 
+		jQuery("#listeVacations").jqGrid('navGrid', '#pagerVacations', {
+			edit : false,
+			add : false,
+			del : true,
+			search : false,
+			refresh : false
+		});
 
+		jQuery("#listeVacations").jqGrid('filterToolbar');
 
-function formateadorLink(cellvalue, options, rowObject) {
-    return "<a href=/vacations/editer/"+ cellvalue + ">" + cellvalue + "</a>";
-}
+		function formateadorLink(cellvalue, options, rowObject) {
+			return "<a href=/vacations/editer/"+ cellvalue + ">" + cellvalue
+					+ "</a>";
+		}
 
+	});
 
-}); 
+	$("#responsable").autocomplete({
+		source : "/ajax/profils",
+		minLength : 3,
+		select : function(event, ui) {
+			document.getElementById('responsable_id').value = ui.item.id;
+		}
+	});
 
-$("#responsable").autocomplete( 
-		{ 
-			source: "/ajax/profils", 
-			minLength: 3, 
-			select: function(event, ui) {document.getElementById('responsable_id').value = ui.item.id; }  
-});
+	window.onload = function() {
+		var responsable_id = document.getElementById('responsable_id').value;
 
-
-window.onload = function() {
-    var responsable_id = document.getElementById('responsable_id').value;
-	
-    if (responsable_id == ""){
-    	responsable_de_lieu();
-    }
-}
+		if (responsable_id == "") {
+			responsable_de_lieu();
+		}
+	}
 </script>
 
