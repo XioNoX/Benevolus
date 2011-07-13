@@ -185,17 +185,19 @@
 
 
 					<ul id="listeAttente">
-						<F3:repeat value="{{@item}}" group="{{@listeAttente}}">
+						<F3:repeat value="{{@item}}" key="{{@key}}" group="{{@listeAttente}}">
 							<F3:check if="{{@item.valide == 1}}">
 								<F3:false>
 									<li>{{@item.prenom}} {{@item.nom}} né(e) le
 										{{date('d/m/Y',strtotime(@item.date_naissance))}} invité(e) le
 										{{date('d/m/Y',strtotime(@item.date_invitation))}} en attente de
 										validation par l'équipe bénévoles du festival <a
-										id="{{@item.id}" class="supprimerInvitation" href="#">X</a>
+										id="{{@item.id}}" class="supprimerInvitation" href="#">X</a>
 									</li>
 								</F3:false>
-								<F3:true>
+							</F3:check>
+							<F3:check if="{{@item.valide == 0}}">
+								<F3:false>
 									<li>{{@item.prenom}} {{@item.nom}} né(e) le
 										{{date('d/m/Y',strtotime(@item.date_naissance))}} invité(e) le
 										{{date('d/m/Y',strtotime(@item.date_invitation))}} <a
@@ -203,7 +205,7 @@
 											compte</a> - <a id="{{@item.id}}" class="supprimerInvitation"
 										href="#">Supprimer</a>
 									</li>
-								</F3:true>
+								</F3:false>
 							</F3:check>
 						</F3:repeat>
 					</ul>
