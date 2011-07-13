@@ -52,7 +52,7 @@ class Profils {
 		F3::call('outils::menu');
 		$uuid = F3::get('PARAMS.id');
 		$invitation=new Axon('invitations');
-		$invitation->load("uuid=$uuid");
+		$invitation->load("uuid='$uuid'");
 			
 		if ($invitation->dry())
 		F3::set('erreur','Cette invitation est mauvaise ou a déjà été utilisée');
@@ -103,7 +103,7 @@ class Profils {
 		if(!F3::exists('message')) {
 
 			$invitation=new Axon('invitations');
-			$invitation->load("uuid=$uuid");
+			$invitation->load("uuid='$uuid'");
 
 			if ($invitation->dry())
 			{
