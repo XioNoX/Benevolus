@@ -809,7 +809,8 @@ class Profils {
 					$json['nom'] = $row['nom'];
 					$json['prenom'] = $row['prenom'];
 					$json['date_naissance'] = outils::date_sql_fr($row['date_naissance']);
-					$json['libelle'] = ''. F3::get('DB')->result[0]['libelle'];
+					if (count(F3::get('DB')->result) > 0) 
+						$json['libelle'] = ''. F3::get('DB')->result[0]['libelle'];
 					$json['adresse1'] = $row['adresse1'];
 					$json['ville'] = $row['ville'];
 					$json['telephone_fixe'] = $row['telephone_fixe'];
