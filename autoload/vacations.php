@@ -1069,7 +1069,7 @@ class Vacations {
 			//echo $individu[0]['prenom'];
 			$i_adresse = $individu[0]["i_nom"] . " " .   $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
 			if ($individu[0]['adresse2'] != NULL)
-			$i_adresse .= $individu[0]['adresse2'];
+			$i_adresse .= $individu[0]['adresse2'] . "\n";
 			$i_adresse .= $individu[0]['cp'] . " " . $individu[0]['v_nom'];
 
 			$pdf->Cell(100);
