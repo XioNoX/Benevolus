@@ -245,6 +245,8 @@ class Acces {
 		if($present != "")
 		{
 			DB::sql("UPDATE `historique_organismes` SET `present` = 1 WHERE `individu_id` = $individu_id AND `festival_id` = $festival_id;");
+			$operateur_id = F3::get('SESSION.id');
+			historique::logger("Accès remis a $individu_id par $operateur_id");
 			F3::set('succes','Enregistré');
 		}
 		else
@@ -266,7 +268,7 @@ class Acces {
 				F3::set('PARAMS.id',$individu_id);
 			}
 		}
-
+				
 		F3::set('acces',1);
 		F3::call('profils::afficher');
 	}
