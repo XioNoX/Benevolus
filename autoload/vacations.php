@@ -319,7 +319,9 @@ class Vacations {
 		}
 		else F3::http404();
 	}
+	
 
+    
 	static function distribuer_organismes() {
 		outils::activerJqgrid();
 		F3::call('outils::menu');
@@ -387,7 +389,63 @@ class Vacations {
 		echo $message;
 
 	}
+	
+    static function emargement_lieu() {
+		F3::call('outils::menu');
+		F3::call('outils::verif_responsable');
+    }
+    
+    static function emargement_organisme() {
+		F3::call('outils::menu');
+		F3::call('outils::verif_responsable');
 
+    }
+    
+    static function emargement_vacation() {
+		F3::call('outils::menu');
+		F3::call('outils::verif_admin');
+		
+		F3::set('pagetitle','Saisie des heures travaillées');
+		$festival_id = F3::get('SESSION.festival_id');
+		$vacation_id = F3::get('PARAMS.id');
+		//F3::call('vacations::verif_vacation_id'); //TODO XSS/SQL
+		if (!F3::exists('message')) {
+			$vacation=new Axon('vacations');
+			$vacation->load("id=$vacation_id");
+			
+			
+			F3::set('vacation',$vacation);	
+			
+			$contenu='<table style="width:500px">';
+			 //TODO: SQLi
+			$affectations = DB::sql("SELECT individus.id, individus.prenom, individus.nom FROM affectations, individus WHERE individus.id = affectations.individu_id AND affectations.vacation_id = $vacation_id ORDER BY individus.nom;");
+			print_r($affectations);
+						
+			foreach($affectations as $affectation)
+			{
+				$individu_id = $affectation["id"];
+				$contenu .= "<tr><td>" .$affectation["nom"] . ' ' . $affectation["prenom"] .  "</td>";
+				
+				$contenu .= '<td><input type="radio" name="'. $individu_id . '" value="1" checked><label for="individu">Tout OK</label></td>';
+				$contenu .= '<td><input type="radio" name="'. $individu_id . '" value="2"><label for="individu">Modifier</label></td>';
+				$contenu .= '<td>de <input type="text" size="4" class="heure_debut" name="heure_debut_'.$individu_id.'" id="heure_debut_'.$individu_id.'  /></td>';
+				$contenu .= '<td>à <input type="text" size="4" class="heure_fin" name="heure_fin_'.$individu_id.'" id="heure_fin_'.$individu_id.'  /></td>';
+				$contenu .= '<td><input type="radio" name="'. $individu_id . '" value="3"><label for="individu">Pas travaillé</label></td>';
+
+				$contenu .= '</tr>';				
+			}
+			$contenu .= '</table>';
+
+			F3::set('contenu',$contenu);
+			F3::set('template','form_emargement');
+			F3::call('outils::generer');	
+			
+			
+			
+		}
+    }
+    
+    
 	static function editer_post() {
 		F3::set('type','vacation');
 		F3::call('outils::verif_responsable');
@@ -395,7 +453,7 @@ class Vacations {
 		// Suppression d'un éventuel précédent message d'erreur
 		F3::clear('message');
 		// Vérification des champs
-		F3::call('vacations::verif::vacation_id|vacations::verif_libelle|vacations::verif_responsable_id'); //TODO: factoriser toutes ces verif dans outils // TODO: Verif autres champs
+		F3::call('vacations::verif_vacation_id|vacations::verif_libelle|vacations::verif_responsable_id'); //TODO: factoriser toutes ces verif dans outils // TODO: Verif autres champs
 		if (!F3::exists('message')) {
 
 			// Pas d'erreur, enregistrement de la organisme

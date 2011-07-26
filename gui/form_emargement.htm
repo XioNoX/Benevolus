@@ -1,0 +1,25 @@
+<h3>{{@pagetitle}}</h3>
+
+<F3:check if="{{@message}}">
+	<F3:true>
+		<p class="fail">{{@message}}</p>
+	</F3:true>
+</F3:check>
+
+<F3:check if="{{@succes}}">
+	<F3:true>
+		<p class="pass">{{@succes}}</p>
+	</F3:true>
+</F3:check>
+
+<p class="info">
+Info
+</p>
+
+<form name="emargement" method="post" action="{{@PARAMS.0}}">
+<dl>
+	<dt>Individus : </dt>
+	<dd>{{html_entity_decode(@contenu)}}</dd>
+	<dd><input type="submit" name="submit" value="Valider" /></dd>
+</dl>
+</form>
