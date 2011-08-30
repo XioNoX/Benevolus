@@ -13,26 +13,37 @@
 </F3:check>
 
 <form name="foo" action="#" onsubmit="validate()">
-<label for="codebarres">Code barres :</label> <input type="text" id="codebarres" name="codebarres" autofocus/>
+	<label for="codebarres">Code barres :</label>
+	<input type="text" id="codebarres" autofocus />
 </form>
 
-<p class="info">
-{{@vacation->id}} {{@vacation->libelle}} Heure début : {{outils::date_sql_timepicker(@vacation->heure_debut)}} Heure fin : {{outils::date_sql_timepicker(@vacation->heure_fin)}}
-</p>
-
-<form name="emargement" method="post" action="{{@PARAMS.0}}">
-<dl>
-	<dt>Individus : </dt>
-	<dd>{{html_entity_decode(@contenu)}}</dd>
-	<dd><input type="submit" name="submit" value="Valider" /></dd>
-</dl>
-</form>
+<F3:check if="{{@contenu}}">
+	<F3:true>
+	
+		<p class="info">
+		{{@vacation->id}} {{@vacation->libelle}} Heure début : {{outils::date_sql_timepicker(@vacation->heure_debut)}} Heure fin : {{outils::date_sql_timepicker(@vacation->heure_fin)}}
+		</p>
+		
+		<form name="emargement" method="post" action="{{@PARAMS.0}}">
+		<dl>
+			<dt>Individus : </dt>
+			<dd>{{html_entity_decode(@contenu)}}</dd>
+			<dd><input type="submit" name="submit" value="Valider" /></dd>
+		</dl>
+		</form>
+	
+	</F3:true>
+</F3:check>
 
 <script>
 function validate() {
 	var codebarres = document.getElementById("codebarres").value;
 	if(checkEan(codebarres)){ //Si valide
-		codebarres.value = codebarres.substring(0, codebarres.length - 1);
+		codebarres = codebarres.substring(0, codebarres.length - 1);
+		window.location = '/vacations/emargement/vacation/'+codebarres;
+	}
+	else if(!isNaN(codebarres))
+	{
 		window.location = '/vacations/emargement/vacation/'+codebarres;
 	}
 	else{

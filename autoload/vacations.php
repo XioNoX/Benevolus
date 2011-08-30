@@ -6,7 +6,7 @@ class Vacations {
 		F3::call('outils::menu');
 		F3::call('outils::verif_admin');
 		F3::set('pagetitle','Liste des vacations');
-		F3::set('lien_ajouter','<a href=/vacations/ajouter>Ajouter une vacation</a> - <a href=/vacations/organismes>Distribuer des vacations aux organismes</a> - <a href=/vacations/echanger>Echanger les vacations entre 2 individus</a>');
+		F3::set('lien_ajouter','<a href=/vacations/ajouter>Ajouter une vacation</a> - <a href=/vacations/organismes>Distribuer des vacations aux organismes</a> - <a href=/vacations/echanger>Echanger les vacations entre 2 individus</a> - <a href=/vacations/emargement/vacation/>Saisie des heures travaillées</a>');
 		F3::set('jquery_url_list','/ajax/vacations');
 		F3::set('jquery_url_edit','/vacations/editer/');
 		F3::set('jquery_url_edit2','/vacations/editer');
@@ -408,67 +408,73 @@ class Vacations {
 		F3::set('pagetitle','Saisie des heures travaillées');
 		$festival_id = F3::get('SESSION.festival_id');
 		$vacation_id = F3::get('PARAMS.id');
+		
 		//F3::call('vacations::verif_vacation_id'); //TODO XSS/SQL
 		if (!F3::exists('message')) {
-			$vacation=new Axon('vacations');
-			$vacation->load("id=$vacation_id");		
-				
-			F3::set('vacation',$vacation);
-				
-			$contenu='<table style="width:800px">';
-			//TODO: SQLi
-			$affectations = DB::sql("SELECT individus.id, individus.prenom, individus.nom, affectations.pas_travaille, affectations.heure_debut, affectations.heure_fin FROM affectations, individus WHERE individus.id = affectations.individu_id AND affectations.vacation_id = $vacation_id ORDER BY individus.nom;");
-
-			foreach($affectations as $affectation)
+							
+			if($vacation_id != "")
 			{
-				$individu_id = $affectation["id"];
-				$heure_debut = $affectation["heure_debut"];
-				if($heure_debut == '00:00:00') $heure_debut = $vacation->heure_debut;
-				$heure_fin = $affectation["heure_fin"];
-				if($heure_fin == '00:00:00') $heure_fin = $vacation->heure_fin;
-				$heure_debut_timepicker = outils::date_sql_timepicker($heure_debut);
-				$heure_fin_timepicker = outils::date_sql_timepicker($heure_fin);
-				
-				
-				$contenu .= "<tr><td>" .$affectation["nom"] . ' ' . $affectation["prenom"] .  "</td>";
-				if($affectation["pas_travaille"] == 0 && $heure_debut == $vacation->heure_debut && $heure_fin == $vacation->heure_fin)
-				{
-					$contenu .= '<td><input type="radio" id="ok_'.$individu_id.'" name="'. $individu_id . '" value="1" checked /><label for="ok_'.$individu_id.'">OK</label></td>';
-					$contenu .= '<td><input type="radio" id="modifier_'.$individu_id.'" name="'. $individu_id . '" value="2" /><label for="modifier_'.$individu_id.'">Modifier, </label>';
-					$contenu .= 'de <input type="text" size="4" class="heure_debut" value="'.$heure_debut_timepicker.'" name="heure_debut_'.$individu_id.'" id="heure_debut_'.$individu_id.'" />';
-					$contenu .= ' à <input type="text" size="4" class="heure_fin" value="'.$heure_fin_timepicker.'" name="heure_fin_'.$individu_id.'" id="heure_fin_'.$individu_id.'" /></td>';
-					$contenu .= '<td><input type="radio" id="pastra_'.$individu_id.'" name="'. $individu_id . '" value="3"><label for="pastra_'.$individu_id.'">Pas travaillé</label></td>';
-					$contenu .= '</tr>';
-				}
-				else if($affectation["pas_travaille"] == 0 && ($heure_debut != $vacation->heure_debut  || $heure_fin != $vacation->heure_fin)) //heure debut heure fin != hdeb,hfin de la vacation et pas travaillé = 0
-				{
-					$contenu .= '<td><input type="radio" id="ok_'.$individu_id.'" name="'. $individu_id . '" value="1"  /><label for="ok_'.$individu_id.'">OK</label></td>';
-					$contenu .= '<td><input type="radio" id="modifier_'.$individu_id.'" name="'. $individu_id . '" value="2" checked/><label for="modifier_'.$individu_id.'">Modifier, </label>';
-					$contenu .= 'de <input type="text" size="4" class="heure_debut" value="'.$heure_debut_timepicker.'" name="heure_debut_'.$individu_id.'" id="heure_debut_'.$individu_id.'" />';
-					$contenu .= ' à <input type="text" size="4" class="heure_fin" value="'.$heure_fin_timepicker.'" name="heure_fin_'.$individu_id.'" id="heure_fin_'.$individu_id.'" /></td>';
-					$contenu .= '<td><input type="radio" id="pastra_'.$individu_id.'" name="'. $individu_id . '" value="3"><label for="pastra_'.$individu_id.'">Pas travaillé</label></td>';
-					$contenu .= '</tr>';
-					
-				}
-				else if($affectation["pas_travaille"] == 1) //si pas travaillé = 1
-				{
-					$contenu .= '<td><input type="radio" id="ok_'.$individu_id.'" name="'. $individu_id . '" value="1"  /><label for="ok_'.$individu_id.'">OK</label></td>';
-					$contenu .= '<td><input type="radio" id="modifier_'.$individu_id.'" name="'. $individu_id . '" value="2" /><label for="modifier_'.$individu_id.'">Modifier, </label>';
-					$contenu .= 'de <input type="text" size="4" class="heure_debut" value="'.$heure_debut_timepicker.'" name="heure_debut_'.$individu_id.'" id="heure_debut_'.$individu_id.'" />';
-					$contenu .= ' à <input type="text" size="4" class="heure_fin" value="'.$heure_fin_timepicker.'" name="heure_fin_'.$individu_id.'" id="heure_fin_'.$individu_id.'" /></td>';
-					$contenu .= '<td><input type="radio" id="pastra_'.$individu_id.'" name="'. $individu_id . '" value="3" checked /><label for="pastra_'.$individu_id.'">Pas travaillé</label></td>';
-					$contenu .= '</tr>';
-				}
-				else
-				{
-					$contenu .= "cas inconnu";
-				}
-			}
-			$contenu .= '</table>';
+				$vacation=new Axon('vacations');
+				$vacation->load("id=$vacation_id");
 
-			F3::set('contenu',$contenu);
+				F3::set('vacation',$vacation);
+
+				$contenu='<table style="width:530px"><tr><td style="width:150px"></td><td style="width:50px"></td><td style="width:230px"></td><td style="width:100px"></td></tr>';
+				//TODO: SQLi
+				$affectations = DB::sql("SELECT individus.id, individus.prenom, individus.nom, affectations.pas_travaille, affectations.heure_debut, affectations.heure_fin FROM affectations, individus WHERE individus.id = affectations.individu_id AND affectations.vacation_id = $vacation_id ORDER BY individus.nom;");
+
+				foreach($affectations as $affectation)
+				{
+					$individu_id = $affectation["id"];
+					$heure_debut = $affectation["heure_debut"];
+					if($heure_debut == '00:00:00') $heure_debut = $vacation->heure_debut;
+					$heure_fin = $affectation["heure_fin"];
+					if($heure_fin == '00:00:00') $heure_fin = $vacation->heure_fin;
+					$heure_debut_timepicker = outils::date_sql_timepicker($heure_debut);
+					$heure_fin_timepicker = outils::date_sql_timepicker($heure_fin);
+
+
+					$contenu .= "<tr><td>" .$affectation["nom"] . ' ' . $affectation["prenom"] .  "</td>";
+					if($affectation["pas_travaille"] == 0 && $heure_debut == $vacation->heure_debut && $heure_fin == $vacation->heure_fin)
+					{
+						$contenu .= '<td><input type="radio" id="ok_'.$individu_id.'" name="'. $individu_id . '" value="1" checked /><label for="ok_'.$individu_id.'">OK</label></td>';
+						$contenu .= '<td><input type="radio" id="modifier_'.$individu_id.'" name="'. $individu_id . '" value="2" /><label for="modifier_'.$individu_id.'">Modifier, </label>';
+						$contenu .= 'de <input type="text" size="4" class="heure_debut" value="'.$heure_debut_timepicker.'" name="heure_debut_'.$individu_id.'" id="heure_debut_'.$individu_id.'" />';
+						$contenu .= ' à <input type="text" size="4" class="heure_fin" value="'.$heure_fin_timepicker.'" name="heure_fin_'.$individu_id.'" id="heure_fin_'.$individu_id.'" /></td>';
+						$contenu .= '<td><input type="radio" id="pastra_'.$individu_id.'" name="'. $individu_id . '" value="3"><label for="pastra_'.$individu_id.'">Pas travaillé</label></td>';
+						$contenu .= '</tr>';
+					}
+					else if($affectation["pas_travaille"] == 0 && ($heure_debut != $vacation->heure_debut  || $heure_fin != $vacation->heure_fin)) //heure debut heure fin != hdeb,hfin de la vacation et pas travaillé = 0
+					{
+						$contenu .= '<td><input type="radio" id="ok_'.$individu_id.'" name="'. $individu_id . '" value="1"  /><label for="ok_'.$individu_id.'">OK</label></td>';
+						$contenu .= '<td><input type="radio" id="modifier_'.$individu_id.'" name="'. $individu_id . '" value="2" checked/><label for="modifier_'.$individu_id.'">Modifier, </label>';
+						$contenu .= 'de <input type="text" size="4" class="heure_debut" value="'.$heure_debut_timepicker.'" name="heure_debut_'.$individu_id.'" id="heure_debut_'.$individu_id.'" />';
+						$contenu .= ' à <input type="text" size="4" class="heure_fin" value="'.$heure_fin_timepicker.'" name="heure_fin_'.$individu_id.'" id="heure_fin_'.$individu_id.'" /></td>';
+						$contenu .= '<td><input type="radio" id="pastra_'.$individu_id.'" name="'. $individu_id . '" value="3"><label for="pastra_'.$individu_id.'">Pas travaillé</label></td>';
+						$contenu .= '</tr>';
+							
+					}
+					else if($affectation["pas_travaille"] == 1) //si pas travaillé = 1
+					{
+						$contenu .= '<td><input type="radio" id="ok_'.$individu_id.'" name="'. $individu_id . '" value="1"  /><label for="ok_'.$individu_id.'">OK</label></td>';
+						$contenu .= '<td><input type="radio" id="modifier_'.$individu_id.'" name="'. $individu_id . '" value="2" /><label for="modifier_'.$individu_id.'">Modifier, </label>';
+						$contenu .= 'de <input type="text" size="4" class="heure_debut" value="'.$heure_debut_timepicker.'" name="heure_debut_'.$individu_id.'" id="heure_debut_'.$individu_id.'" />';
+						$contenu .= ' à <input type="text" size="4" class="heure_fin" value="'.$heure_fin_timepicker.'" name="heure_fin_'.$individu_id.'" id="heure_fin_'.$individu_id.'" /></td>';
+						$contenu .= '<td><input type="radio" id="pastra_'.$individu_id.'" name="'. $individu_id . '" value="3" checked /><label for="pastra_'.$individu_id.'">Pas travaillé</label></td>';
+						$contenu .= '</tr>';
+					}
+					else
+					{
+						$contenu .= "cas inconnu";
+					}
+				}
+				$contenu .= '</table>';
+							
+				F3::set('contenu',$contenu);
+			}
+
 			F3::set('template','form_emargement');
-			F3::call('outils::generer');			
+			F3::call('outils::generer');
 		}
 	}
 
@@ -484,25 +490,25 @@ class Vacations {
 			$affectations = DB::sql("SELECT individus.id, individus.prenom, individus.nom FROM affectations, individus WHERE individus.id = affectations.individu_id AND affectations.vacation_id = $vacation_id ORDER BY individus.nom;");
 
 			$vacation=new Axon('vacations');
-			$vacation->load("id=$vacation_id");		
-			
-			
+			$vacation->load("id=$vacation_id");
+				
+				
 			foreach($affectations as $affectation)
 			{
 				//$saisie = F3::get('REQUEST.heure_debut_'.$valeur["id"].'');
-				
+
 				$individu_id = $affectation["id"];
 				$saisie = F3::get('REQUEST.'.$individu_id.'');
-								
+
 				$affectation=new Axon('affectations');
 				$affectation->load("vacation_id='$vacation_id' AND individu_id='$individu_id'");
-				
+
 				if ($saisie == 1) //Tout ok
 				{
 					$affectation->pas_travaille = 0;
 					$affectation->heure_debut = $vacation->heure_debut;
-				    $affectation->heure_fin = $vacation->heure_fin;
-					
+					$affectation->heure_fin = $vacation->heure_fin;
+						
 				}
 				else if ($saisie == 2) //Modifier
 				{
@@ -514,14 +520,14 @@ class Vacations {
 				{
 					$affectation->pas_travaille = 1;
 				}
-				
+
 				$affectation->save();
 			}
 		}
 		// Ré-Affichage du formulaire
-			F3::set('succes','Présences enregistrées');
-			F3::call('vacations::emargement_vacation');
-			//F3::reroute("/vacations/emargement/vacation/$vacation_id");
+		F3::set('succes','Présences enregistrées');
+		F3::call('vacations::emargement_vacation');
+		//F3::reroute("/vacations/emargement/vacation/$vacation_id");
 	}
 
 	static function editer_post() {
