@@ -419,7 +419,7 @@ class Vacations {
 
 				F3::set('vacation',$vacation);
 
-				$contenu='<table style="width:530px"><tr><td style="width:150px"></td><td style="width:50px"></td><td style="width:230px"></td><td style="width:100px"></td></tr>';
+				$contenu='<table style="width:960px"><tr><td style="width:150px"><td style="width:100px"></td><td style="width:50px"></td><td style="width:240px"></td><td style="width:140px"><td style="width:150px"><td style="width:200px"></td></tr>';
 				//TODO: SQLi
 				$affectations = DB::sql("SELECT individus.id, individus.prenom, individus.actif, individus.nom, individus.commentaire, individus.statut_id, affectations.pas_travaille, affectations.heure_debut, affectations.heure_fin FROM affectations, individus WHERE individus.id = affectations.individu_id AND affectations.vacation_id = $vacation_id ORDER BY individus.nom;");
 				$statuts = DB::sql("SELECT statuts.id, statuts.libelle FROM statuts;");
@@ -435,17 +435,18 @@ class Vacations {
 					$heure_fin_timepicker = outils::date_sql_timepicker($heure_fin);
 
 
-					$contenu .= "<tr><td>" .$affectation["nom"] . ' ' . $affectation["prenom"] .  "</td>";
+					$contenu .= "<tr><td><a href=/profils/editer/".$affectation["id"].">" .$affectation["nom"] . ' ' . $affectation["prenom"] .  "</a></td>";
 					if($affectation["pas_travaille"] == 0 && $heure_debut == $vacation->heure_debut && $heure_fin == $vacation->heure_fin)
 					{
-						if($affectation["actif"] == 1) $contenu .= '<td>bracelet retiré</td>'; else $contenu .= '<td>bracelet non retiré</td>';
+						if($affectation["actif"] == 1) $contenu .= '<td>bracelet retiré</td>'; 
+						else $contenu .= '<td>bracelet non retiré</td>';
 						$contenu .= '<td><input type="radio" id="ok_'.$individu_id.'" name="'. $individu_id . '" value="1" checked /><label for="ok_'.$individu_id.'">OK</label></td>';
 						$contenu .= '<td><input type="radio" id="modifier_'.$individu_id.'" name="'. $individu_id . '" value="2" /><label for="modifier_'.$individu_id.'">Modifier, </label>';
 						$contenu .= 'de <input type="text" size="4" class="heure_debut" value="'.$heure_debut_timepicker.'" name="heure_debut_'.$individu_id.'" id="heure_debut_'.$individu_id.'" />';
 						$contenu .= ' à <input type="text" size="4" class="heure_fin" value="'.$heure_fin_timepicker.'" name="heure_fin_'.$individu_id.'" id="heure_fin_'.$individu_id.'" /></td>';
 						$contenu .= '<td><input type="radio" id="pastra_'.$individu_id.'" name="'. $individu_id . '" value="3"><label for="pastra_'.$individu_id.'">Pas travaillé</label></td>';
 						$contenu .= '<td>' .vacations::menu_statuts($statuts,$individu_id,$affectation["statut_id"]) .'</td>';
-						$contenu .= '<td><textarea id="commentaire_'.$individu_id.'">'.$affectation["commentaire"].'</textarea></td>';
+						$contenu .= '<td><textarea name="commentaire_'.$individu_id.'">'.$affectation["commentaire"].'</textarea></td>';
 						$contenu .= '</tr>';
 						
 					}
@@ -458,7 +459,7 @@ class Vacations {
 						$contenu .= ' à <input type="text" size="4" class="heure_fin" value="'.$heure_fin_timepicker.'" name="heure_fin_'.$individu_id.'" id="heure_fin_'.$individu_id.'" /></td>';
 						$contenu .= '<td><input type="radio" id="pastra_'.$individu_id.'" name="'. $individu_id . '" value="3"><label for="pastra_'.$individu_id.'">Pas travaillé</label></td>';
 						$contenu .= '<td>' .vacations::menu_statuts($statuts,$individu_id,$affectation["statut_id"]) .'</td>';
-						$contenu .= '<td><textarea id="commentaire_'.$individu_id.'">'.$affectation["commentaire"].'</textarea></td>';
+						$contenu .= '<td><textarea name="commentaire_'.$individu_id.'">'.$affectation["commentaire"].'</textarea></td>';
 						$contenu .= '</tr>';
 							
 					}
@@ -471,7 +472,7 @@ class Vacations {
 						$contenu .= ' à <input type="text" size="4" class="heure_fin" value="'.$heure_fin_timepicker.'" name="heure_fin_'.$individu_id.'" id="heure_fin_'.$individu_id.'" /></td>';
 						$contenu .= '<td><input type="radio" id="pastra_'.$individu_id.'" name="'. $individu_id . '" value="3" checked /><label for="pastra_'.$individu_id.'">Pas travaillé</label></td>';
 						$contenu .= '<td>' .vacations::menu_statuts($statuts,$individu_id,$affectation["statut_id"]) .'</td>';
-						$contenu .= '<td><textarea id="commentaire_'.$individu_id.'">'.$affectation["commentaire"].'</textarea></td>';
+						$contenu .= '<td><textarea name="commentaire_'.$individu_id.'">'.$affectation["commentaire"].'</textarea></td>';
 						$contenu .= '</tr>';
 					}
 					else
