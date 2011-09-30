@@ -191,6 +191,10 @@ F3::route('GET /tickets/editer/@id','tickets::editer');
 F3::route('POST /tickets/editer/@id','tickets::editer_post');
 F3::route('POST /tickets/editer','tickets::editer_tableau_post');
 
+F3::route('GET /statistiques/dons','statistiques::dons');
+F3::route('GET /statistiques','statistiques::accueil');
+
+
 
 F3::route('GET /sitemap', //Utilisation d'une fonction de fatfree pour générer le sitemap
 	function() {

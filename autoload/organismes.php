@@ -58,6 +58,11 @@ class Organismes {
 		return F3::get('DB')->result[0]['count'];
 	}
 	
+	static function don_a_faire($heures){
+		DB::sql('SELECT taux_horaire FROM festivals WHERE festivals.id = :festival_id;',array(':festival_id'=>array(F3::get('SESSION.festival_id'),PDO::PARAM_INT)));
+		return $heures*F3::get('DB')->result[0]['taux_horaire'];
+	}
+	
 	static function heures_travaillees($organisme_id,$sortie_type){
 		$festival_id = F3::get('SESSION.festival_id');
 		$nb_heures = 0;
@@ -68,7 +73,7 @@ class Organismes {
 			if ($row['pas_travaille'] != 1){ // Si la personne a bien travailler
 				if(($row['heure_debut'] == $row['heure_fin']) && ($row['heure_debut'] == "00:00:00")){
 					//cas des T0 hdébut == hfin
-					$nb_heures =  $nb_heures + 8; //FIXME definir la bonne valeur
+					$nb_heures =  $nb_heures + 8; //FIXME definir dans les options
 					//echo($row['individu_id']);
 				}
 
@@ -104,8 +109,6 @@ class Organismes {
 					$nb_secondes = $nb_secondes + $diff; //secondes
 				}
 			}
-			else
-			return -1;
 		}
 
 		if( $nb_minutes = $nb_minutes + intval((floor($nb_secondes/60))) )

@@ -123,7 +123,8 @@ class Outils {
 						array("titre"=>"Vacations","lien"=>"/vacations"),
 						array("titre"=>"Historique","lien"=>"/historique"),
 						array("titre"=>"Affectations","lien"=>"/vacations/affecter"),
-						array("titre"=>"Accès","lien"=>"/acces")
+						array("titre"=>"Accès","lien"=>"/acces"),
+						array("titre"=>"Statistiques","lien"=>"/statistiques")
 							
 						)
 						)
