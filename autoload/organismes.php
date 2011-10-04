@@ -60,7 +60,8 @@ class Organismes {
 	
 	static function don_a_faire($heures){
 		DB::sql('SELECT taux_horaire FROM festivals WHERE festivals.id = :festival_id;',array(':festival_id'=>array(F3::get('SESSION.festival_id'),PDO::PARAM_INT)));
-		return $heures*F3::get('DB')->result[0]['taux_horaire'];
+		$taux = floatval(preg_replace("/,/",".",F3::get('DB')->result[0]['taux_horaire']));
+		return $heures*$taux;
 	}
 	
 	static function heures_travaillees($organisme_id,$sortie_type){
