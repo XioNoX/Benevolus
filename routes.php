@@ -192,6 +192,7 @@ F3::route('POST /tickets/editer/@id','tickets::editer_post');
 F3::route('POST /tickets/editer','tickets::editer_tableau_post');
 
 F3::route('GET /statistiques/dons','statistiques::dons');
+F3::route('GET /statistiques/dons/@id','statistiques::imprimer_bilan_organisme');
 F3::route('GET /statistiques','statistiques::accueil');
 
 
