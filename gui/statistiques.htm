@@ -1,2 +1,12 @@
 <h3>{{@pagetitle}}</h3>
 <a href="/statistiques/dons">Dons</a>
+
+<div id="chartcontainer">This is just a replacement in case Javascript is not available or used for SEO purposes</div>
+<script type="text/javascript">
+	var myChart = new JSChart('chartcontainer', 'pie');
+	myChart.setDataJSON('/statistiques/ajax/statuts');
+	myChart.draw();
+</script>
+
+
+

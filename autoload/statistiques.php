@@ -3,31 +3,54 @@ class Statistiques {
 	static function accueil() {
 		F3::call('outils::menu');
 		F3::call('outils::verif_admin');
+		F3::call('outils::activerJsCharts');
 		F3::set('pagetitle','Statistiques');
 		F3::set('template','statistiques');
 		F3::call('outils::generer');
 	}
 	
-	static function ajax_stats($id) {
+	static function ajax_stats($action) {
 		F3::call('outils::verif_admin');
 		$festival_id = F3::get('SESSION.festival_id');
-		switch ($type) {
-			case "statuts":
-				DB::sql("SELECT COUNT(DISTINCT affectations.individu_id) as count FROM `vacations`, `festivals_jours` , `affectations`, `historique_organismes` WHERE affectations.heure_debut!=''  AND affectations.pas_travaille=0 AND festivals_jours.festival_id = $festival_id AND `vacations`.festival_jour_id = festivals_jours.id AND `vacations`.id = affectations.vacation_id AND `affectations`.individu_id = `historique_organismes`.individu_id AND `historique_organismes`.festival_id = $festival_id AND `historique_organismes`.organisme_id = $organisme_id;");
+		
+		
+		$data = array();
+		switch ($action) {
+			case "statuts": //total=personnes dans les asso de ce festival, divisions par statuts
+				
+				DB::sql("SELECT * FROM statuts;");
+				foreach (F3::get('DB')->result as $row) {
+					$statut_id = $row['id'];
+					$libelle = $row['libelle'];
+					DB::sql("SELECT count(historique_organismes.id) AS total FROM historique_organismes, individus WHERE historique_organismes.festival_id=$festival_id AND individus.statut_id=$statut_id AND historique_organismes.individu_id=individus.id;");
+					$comp_statuts = F3::get('DB')->result[0]['total'];
+					
+
+					$data['unit'] = $statut_id;
+					$data['value'] = $comp_statuts;
+					$data_tmp[] = $data;
+				}
+				
+				
+				
 				break;
+				
 			case 'travail':
 				DB::sql("SELECT COUNT(id) as count FROM `historique_organismes` WHERE `festival_id` = $festival_id AND `organisme_id` = $organisme_id AND `present`= 0");
 				break;
 		}
-		foreach (F3::get('DB')->result as $row) {
-			$json = array();
-			$json['id'] = $row['id'];
-			$json['label'] = $row['cp'] . " - " . $row['nom'];
-			$json['value'] = $row['cp'] . " - " . $row['nom'];
-			$data[] = $json;
-		}
+		
+		$final = array();
+		$JSChart = array();
+		$datasets = array();	
+		$datasets['type'] = "pie";
+		$datasets['data'] = $data_tmp;
+		$JSChart['datasets'] = $datasets;
+		$final['JSChart'] = $JSChart;
+		
+		
 		header("Content-type: application/json");
-		echo json_encode($data);
+		print outils::jsonRemoveUnicodeSequences($final) . "\n";
 	}
 	
 	

@@ -14,7 +14,11 @@
    </F3:true>
 </F3:check> 
 
-
+      <F3:check if="{{@jscharts == 1}}">
+      <F3:true>
+	        <script type='text/javascript' src='/gui/js/libs/jscharts.js'></script>
+   	  </F3:true>
+      </F3:check>   
   <F3:check if="{{@jquery == 1}}">
     <F3:true>
 
@@ -61,7 +65,8 @@
         <!-- required for TextboxList -->
 	      <script src="/gui/js/libs/facybox.js" type="text/javascript" charset="utf-8"></script>
       </F3:true>
-      </F3:check>        
+      </F3:check>    
+   
 
 
     </F3:true>
