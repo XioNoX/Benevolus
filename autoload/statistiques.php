@@ -7,6 +7,32 @@ class Statistiques {
 		F3::set('template','statistiques');
 		F3::call('outils::generer');
 	}
+	
+	static function ajax_stats($id) {
+		F3::call('outils::verif_admin');
+		$festival_id = F3::get('SESSION.festival_id');
+		switch ($type) {
+			case "statuts":
+				DB::sql("SELECT COUNT(DISTINCT affectations.individu_id) as count FROM `vacations`, `festivals_jours` , `affectations`, `historique_organismes` WHERE affectations.heure_debut!=''  AND affectations.pas_travaille=0 AND festivals_jours.festival_id = $festival_id AND `vacations`.festival_jour_id = festivals_jours.id AND `vacations`.id = affectations.vacation_id AND `affectations`.individu_id = `historique_organismes`.individu_id AND `historique_organismes`.festival_id = $festival_id AND `historique_organismes`.organisme_id = $organisme_id;");
+				break;
+			case 'travail':
+				DB::sql("SELECT COUNT(id) as count FROM `historique_organismes` WHERE `festival_id` = $festival_id AND `organisme_id` = $organisme_id AND `present`= 0");
+				break;
+		}
+		foreach (F3::get('DB')->result as $row) {
+			$json = array();
+			$json['id'] = $row['id'];
+			$json['label'] = $row['cp'] . " - " . $row['nom'];
+			$json['value'] = $row['cp'] . " - " . $row['nom'];
+			$data[] = $json;
+		}
+		header("Content-type: application/json");
+		echo json_encode($data);
+	}
+	
+	
+	
+	
 	static function dons() {
 		F3::call('outils::menu');
 		F3::call('outils::verif_admin');
