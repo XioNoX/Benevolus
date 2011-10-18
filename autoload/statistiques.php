@@ -26,7 +26,7 @@ class Statistiques {
 					$comp_statuts = F3::get('DB')->result[0]['total'];
 					
 
-					$data['unit'] = $statut_id;
+					$data['unit'] = $libelle;
 					$data['value'] = $comp_statuts;
 					$data_tmp[] = $data;
 				}
@@ -43,9 +43,10 @@ class Statistiques {
 		$final = array();
 		$JSChart = array();
 		$datasets = array();	
-		$datasets['type'] = "pie";
+		$datasets['type'] = "bar";
 		$datasets['data'] = $data_tmp;
-		$JSChart['datasets'] = $datasets;
+		$datasets_tmp[] = $datasets;
+		$JSChart['datasets'] = $datasets_tmp;
 		$final['JSChart'] = $JSChart;
 		
 		

@@ -1,12 +1,18 @@
 <h3>{{@pagetitle}}</h3>
 <a href="/statistiques/dons">Dons</a>
 
-<div id="chartcontainer">This is just a replacement in case Javascript is not available or used for SEO purposes</div>
+<div id="chart_statuts">Graphique de répartion des statuts parmis les bénévoles affectés</div>
 <script type="text/javascript">
-	var myChart = new JSChart('chartcontainer', 'pie');
-	myChart.setDataJSON('/statistiques/ajax/statuts');
-	myChart.draw();
+	var chart_statuts = new JSChart('chart_statuts', 'pie');
+	chart_statuts.setDataJSON('/statistiques/ajax/statuts');
+	//chart_statuts.set3D(true);
+	chart_statuts.setTitle("Répartion des statuts parmis les bénévoles affectés");
+	chart_statuts.setSize(970, 300);
+	chart_statuts.draw();
 </script>
+
+
+
 
 
 
