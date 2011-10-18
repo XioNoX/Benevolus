@@ -15,10 +15,14 @@ class Statistiques {
 		
 		
 		$data = array();
+		$final = array();
+		$JSChart = array();
+		$datasets = array();
 		switch ($action) {
 			case "statuts": //total=personnes dans les asso de ce festival, divisions par statuts
 				
 				DB::sql("SELECT * FROM statuts;");
+				$datasets['type'] = "bar";
 				foreach (F3::get('DB')->result as $row) {
 					$statut_id = $row['id'];
 					$libelle = $row['libelle'];
@@ -35,15 +39,23 @@ class Statistiques {
 				
 				break;
 				
-			case 'travail':
-				DB::sql("SELECT COUNT(id) as count FROM `historique_organismes` WHERE `festival_id` = $festival_id AND `organisme_id` = $organisme_id AND `present`= 0");
+			case 'indiv_orga':
+				DB::sql("SELECT COUNT(`historique_organismes`.id) as count, libelle FROM `historique_organismes`, `organismes` WHERE `festival_id` = $festival_id AND `organisme_id` = organismes.id GROUP BY organisme_id;");
+				$datasets['type'] = "bar";
+				foreach (F3::get('DB')->result as $row) {
+					$count = $row['count'];
+					$libelle = $row['libelle'];
+					
+					$data['unit'] = $libelle;
+					$data['value'] = $count;
+					$data_tmp[] = $data;
+				}
+				
 				break;
 		}
 		
-		$final = array();
-		$JSChart = array();
-		$datasets = array();	
-		$datasets['type'] = "bar";
+
+		
 		$datasets['data'] = $data_tmp;
 		$datasets_tmp[] = $datasets;
 		$JSChart['datasets'] = $datasets_tmp;
