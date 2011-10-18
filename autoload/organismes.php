@@ -51,6 +51,18 @@ class Organismes {
 			case "travailles":
 				DB::sql("SELECT COUNT(DISTINCT affectations.individu_id) as count FROM `vacations`, `festivals_jours` , `affectations`, `historique_organismes` WHERE affectations.heure_debut!=''  AND affectations.pas_travaille=0 AND festivals_jours.festival_id = $festival_id AND `vacations`.festival_jour_id = festivals_jours.id AND `vacations`.id = affectations.vacation_id AND `affectations`.individu_id = `historique_organismes`.individu_id AND `historique_organismes`.festival_id = $festival_id AND `historique_organismes`.organisme_id = $organisme_id;");
 				break;
+			case "ok":
+				DB::sql("SELECT COUNT(DISTINCT affectations.individu_id) as count FROM `vacations`, `festivals_jours` , `affectations`, `historique_organismes`, `individus` WHERE affectations.heure_debut!=''  AND affectations.pas_travaille=0 AND festivals_jours.festival_id = $festival_id AND `vacations`.festival_jour_id = festivals_jours.id AND `vacations`.id = affectations.vacation_id AND `affectations`.individu_id = `historique_organismes`.individu_id AND `affectations`.individu_id = `individus`.id AND `individus`.statut_id = 1 AND `historique_organismes`.festival_id = $festival_id AND `historique_organismes`.organisme_id = $organisme_id;");
+				break;
+			case "pas-retire":
+				DB::sql("SELECT COUNT(DISTINCT affectations.individu_id) as count FROM `vacations`, `festivals_jours` , `affectations`, `historique_organismes`, `individus` WHERE affectations.heure_debut!=''  AND affectations.pas_travaille=0 AND festivals_jours.festival_id = $festival_id AND `vacations`.festival_jour_id = festivals_jours.id AND `vacations`.id = affectations.vacation_id AND `affectations`.individu_id = `historique_organismes`.individu_id AND `affectations`.individu_id = `individus`.id AND `individus`.statut_id = 2 AND `historique_organismes`.festival_id = $festival_id AND `historique_organismes`.organisme_id = $organisme_id;");
+				break;
+			case "pas-reprendre":
+				DB::sql("SELECT COUNT(DISTINCT affectations.individu_id) as count FROM `vacations`, `festivals_jours` , `affectations`, `historique_organismes`, `individus` WHERE affectations.heure_debut!=''  AND affectations.pas_travaille=0 AND festivals_jours.festival_id = $festival_id AND `vacations`.festival_jour_id = festivals_jours.id AND `vacations`.id = affectations.vacation_id AND `affectations`.individu_id = `historique_organismes`.individu_id AND `affectations`.individu_id = `individus`.id AND `individus`.statut_id = 7 AND `historique_organismes`.festival_id = $festival_id AND `historique_organismes`.organisme_id = $organisme_id;");
+				break;
+			case "ww":
+				DB::sql("SELECT COUNT(DISTINCT affectations.individu_id) as count FROM `vacations`, `festivals_jours` , `affectations`, `historique_organismes`, `individus` WHERE affectations.heure_debut!=''  AND affectations.pas_travaille=0 AND festivals_jours.festival_id = $festival_id AND `vacations`.festival_jour_id = festivals_jours.id AND `vacations`.id = affectations.vacation_id AND `affectations`.individu_id = `historique_organismes`.individu_id AND `affectations`.individu_id = `individus`.id AND `individus`.statut_id = 8 AND `historique_organismes`.festival_id = $festival_id AND `historique_organismes`.organisme_id = $organisme_id;");
+				break;
 			case 'absents':
 				DB::sql("SELECT COUNT(id) as count FROM `historique_organismes` WHERE `festival_id` = $festival_id AND `organisme_id` = $organisme_id AND `present`= 0");
 				break;
