@@ -250,7 +250,6 @@ class Vacations {
 
 		F3::call('vacations::recuperation_lieux');
 		F3::call('outils::recuperation_festivals_jours');
-		F3::allow('date|strtotime');
 		F3::set('pagetitle','Ajouter une vacation');
 		F3::set('template','form_vacations');
 		F3::call('outils::generer');
