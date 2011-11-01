@@ -323,7 +323,18 @@ class Outils {
 	 */	
 	static function dernier_festival() {  //TODO utiliser les dates de festival_jours
 		DB::sql('SELECT id FROM festivals ORDER BY id DESC LIMIT 1'); //Recherche du festival le plus récent (id le plus élevé)
-		F3::set('SESSION.festival_id', F3::get('DB')->result[0]['id']); //définition de la variable de session
+		$countResult = F3::get('DB')->result;
+		//$countResult = 0;
+		if(count($countResult) < 1) {
+			F3::set('SESSION.festival_id','');
+			if (outils::est_admin()) F3::reroute('/festivals/ajouter');
+			else{ 
+				F3::set('message','Aucun festival ou évènement existant - Veuillez contacter l\'administrateur ou le responsable de l\'évènement.');
+				F3::call('connexion::sortie'); 
+			 }				
+		} else {
+			F3::set('SESSION.festival_id', F3::get('DB')->result[0]['id']); //définition de la variable de session
+			}
 	}
 
 	/**
