@@ -243,7 +243,7 @@ class Profils {
 		$festival_annee = F3::get('festival_annee');
 		F3::set('pagetitle',"Liste des bénévoles de $festival_annee");
 		F3::set('description','Bénévoles étant actuellement assignés à une structure pour le festival courant.');
-		F3::set('lien_ajouter','<a href=/profils/tous>Tous les bénévoles</a>');
+		F3::set('lien_ajouter','<a href=/profils/tous>Tous les bénévoles</a> | <a href=/profil/imprimer/courrier/haut>Imprimer courrier haut</a>');
 		F3::set('jquery_url_list','/ajax/profils_festival');
 		F3::set('jquery_url_edit','/profils/editer/');
 		F3::set('jquery_url_edit2','/profils/editer');
@@ -582,8 +582,9 @@ class Profils {
 		$festival = new Axon('festivals');
 		$festival->load("id=$festival_id");
 
-		//Récupération de tous les participants au festival xxxx
-		$individus = DB::sql("SELECT individus.id AS individu_id, organismes.id AS organisme_id FROM `organismes`, `historique_organismes`, `individus` WHERE historique_organismes.individu_id = individus.id AND historique_organismes.festival_id = ($festival_id - 1) AND historique_organismes.organisme_id = organismes.id ORDER BY individus.id DESC LIMIT 10;");
+		//Récupération de tous les participants au festival xxxx et OK
+		//TODO EN DUR
+		$individus = DB::sql("SELECT individus.id AS individu_id, organismes.id AS organisme_id FROM `organismes`, `historique_organismes`, `individus`, `villes` WHERE historique_organismes.individu_id = individus.id AND historique_organismes.festival_id = $festival_id AND historique_organismes.organisme_id = organismes.id AND individus.statut_id=1 AND individus.ville_id=villes.id ORDER BY villes.cp;");
 
 		foreach($individus as $cle=>$valeur)
 		{
@@ -597,7 +598,8 @@ class Profils {
 			$pdf->SetY(55);
 
 			//Organisme
-			$organisme = DB::sql("SELECT o.id, o.libelle FROM organismes AS o, historique_organismes AS ho WHERE ho.individu_id=$individu_id AND ho.festival_id= ($festival_id-1) AND ho.organisme_id=o.id");
+			$organisme_id = Organismes::organisme_individu($individu_id, "");
+			$organisme = DB::sql("SELECT o.id, o.libelle FROM organismes AS o WHERE o.id=$organisme_id");
 			if (count($organisme)>0)
 			{
 				$o_infos = $organisme[0]['libelle'] . "\n" . "n° " . $organisme[0]['id'];
@@ -612,19 +614,19 @@ class Profils {
 
 			$pdf->SetY(55);
 
-			$pdf->AddFont('ocrb');
-			$pdf->SetFont('ocrb');
-
-			$i_adresse = $individu[0]["i_nom"] . " " . $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
+			$pdf->AddFont('ocraextended');
+			$pdf->SetFont('ocraextended');
+			
+			$i_adresse = $individu[0]["i_nom"] . " " .   $individu[0]['prenom'] . "\n" . $individu[0]['adresse1'] . "\n";
 			if ($individu[0]['adresse2'] != NULL)
-			$i_adresse .= $individu[0]['adresse2'];
+			$i_adresse .= $individu[0]['adresse2'] . "\n";
 			$i_adresse .= $individu[0]['cp'] . " " . $individu[0]['v_nom'];
 
 			$pdf->Cell(100);
 			$pdf->MultiCell(0, 6, $i_adresse, 0, 'L');
 		}
 
-		$pdf->Output("Affectations-".$individu_id."-".$festival->annee.".pdf", 'D');
+		$pdf->Output("Affectations-".$festival->annee.".pdf", 'D');
 	}
 
 	static function verif_nom() {
