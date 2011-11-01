@@ -195,6 +195,9 @@ F3::route('GET /statistiques/dons','statistiques::dons');
 F3::route('GET /statistiques/dons/@id','statistiques::imprimer_bilan_organisme');
 F3::route('GET /statistiques','statistiques::accueil');
 
+F3::route('GET /statistiques/ajax/@action',function() {
+	statistiques::ajax_stats(F3::get('PARAMS.action'));
+});
 
 
 F3::route('GET /sitemap', //Utilisation d'une fonction de fatfree pour générer le sitemap

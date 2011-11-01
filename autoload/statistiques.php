@@ -3,10 +3,72 @@ class Statistiques {
 	static function accueil() {
 		F3::call('outils::menu');
 		F3::call('outils::verif_admin');
+		F3::call('outils::activerJsCharts');
 		F3::set('pagetitle','Statistiques');
 		F3::set('template','statistiques');
 		F3::call('outils::generer');
 	}
+	
+	static function ajax_stats($action) {
+		F3::call('outils::verif_admin');
+		$festival_id = F3::get('SESSION.festival_id');
+		
+		
+		$data = array();
+		$final = array();
+		$JSChart = array();
+		$datasets = array();
+		switch ($action) {
+			case "statuts": //total=personnes dans les asso de ce festival, divisions par statuts
+				
+				DB::sql("SELECT * FROM statuts;");
+				$datasets['type'] = "bar";
+				foreach (F3::get('DB')->result as $row) {
+					$statut_id = $row['id'];
+					$libelle = $row['libelle'];
+					DB::sql("SELECT count(historique_organismes.id) AS total FROM historique_organismes, individus WHERE historique_organismes.festival_id=$festival_id AND individus.statut_id=$statut_id AND historique_organismes.individu_id=individus.id;");
+					$comp_statuts = F3::get('DB')->result[0]['total'];
+					
+
+					$data['unit'] = $libelle;
+					$data['value'] = $comp_statuts;
+					$data_tmp[] = $data;
+				}
+				
+				
+				
+				break;
+				
+			case 'indiv_orga':
+				DB::sql("SELECT COUNT(`historique_organismes`.id) as count, libelle FROM `historique_organismes`, `organismes` WHERE `festival_id` = $festival_id AND `organisme_id` = organismes.id GROUP BY organisme_id;");
+				$datasets['type'] = "bar";
+				foreach (F3::get('DB')->result as $row) {
+					$count = $row['count'];
+					$libelle = $row['libelle'];
+					
+					$data['unit'] = $libelle;
+					$data['value'] = $count;
+					$data_tmp[] = $data;
+				}
+				
+				break;
+		}
+		
+
+		
+		$datasets['data'] = $data_tmp;
+		$datasets_tmp[] = $datasets;
+		$JSChart['datasets'] = $datasets_tmp;
+		$final['JSChart'] = $JSChart;
+		
+		
+		header("Content-type: application/json");
+		print outils::jsonRemoveUnicodeSequences($final) . "\n";
+	}
+	
+	
+	
+	
 	static function dons() {
 		F3::call('outils::menu');
 		F3::call('outils::verif_admin');

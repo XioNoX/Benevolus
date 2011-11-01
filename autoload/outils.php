@@ -415,7 +415,12 @@ class Outils {
 		outils::activerJquery();
 		F3::set('facybox',1);
 	}
-
+	static function activerJsCharts() {
+		F3::set('jscharts',1);
+	}
+	static function jsonRemoveUnicodeSequences($struct) {
+		return preg_replace("/\\\\u([a-f0-9]{4})/e", "iconv('UCS-4LE','UTF-8',pack('V', hexdec('U$1')))", json_encode($struct));
+	}
 	
 	/**
 	 * Génération aléatoire de mot de passe
