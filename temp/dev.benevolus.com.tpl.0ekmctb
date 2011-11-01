@@ -1,0 +1,39 @@
+<!doctype html>  
+
+<!--[if lt IE 7 ]> <html lang="fr" class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="fr" class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="fr" class="no-js ie8"> <![endif]-->
+<!--[if IE 9 ]>    <html lang="fr" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="fr" class="no-js"> <!--<![endif]-->
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="/gui/css/theme.css"/>
+	
+	<title><?php echo ($_site=F3::get('site')); ?></title>
+</head>
+<body>
+	<header>
+		<h2><?php echo $_site; ?></h2>
+	</header>
+	<div id="main">
+		<h3><?php echo ($_pagetitle=F3::get('pagetitle')); ?> </h3>
+<form name="login" method="post" action="/connexion" >
+	<?php if (($_message=F3::get('message'))): ?>
+		<p class="fail"><?php echo $_message; ?></p>
+	<?php endif; ?>
+	<dl>
+		<dt><label for="login">Email ou Numéro d'identifiant</label></dt>
+		<dd><input type="text" name="login" id="login" value="<?php echo F3::get('REQUEST.login'); ?>" required autofocus/></dd>
+		<dt><label for="password">Mot de passe</label></dt>
+		<dd><input type="password" name="password" id="password" required/></dd>
+		<dd><input type="submit" name="seconnecter" value="Se connecter"/></dd>
+	</dl>
+</form>
+
+	</div>
+	<footer>
+		<p id=credits>Pour toutes informations, veuillez contacter le service bénévole à <a href=mailto:benevoles@vieillescharrues.asso.fr>benevoles@vieillescharrues.asso.fr</a></p>
+	
+			</footer>
+</body>
+</html>

@@ -30,7 +30,7 @@ class Connexion {
 	}
 
 	/**
-	 * Authentification d'une personne qui a validée le formulaire de connexion
+	 * Authentification d'une personne qui a validé le formulaire de connexion
 	 */
 	static function auth() {
 		F3::clear('message'); //Efface les eventuels message d'erreur restés en mêmoire

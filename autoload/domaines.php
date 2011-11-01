@@ -67,7 +67,7 @@ class Domaines {
 				if(outils::est_admin())
         {
           DB::sql('DELETE FROM domaines WHERE id = :id ;',array(':id'=>array($id,PDO::PARAM_INT)));
-          historique::logger("Suppréssion du domaine ". $organismes->libelle);
+          historique::logger("Suppression du domaine ". $organismes->libelle);
         } 
 			}
 		}
