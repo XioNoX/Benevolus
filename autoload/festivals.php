@@ -112,8 +112,7 @@ class Festivals {
 				DB::sql("INSERT INTO festivals_jours VALUES ('', '$jour', $festival_id)");
 				$ts_tmp = mktime(0,0,0,date("m", $ts_tmp )  ,date("d",$ts_tmp ) + 1, date("Y", $ts_tmp ));
 			}
-     
-      F3::set('SESSION.festival_id',$festival_id); 
+      
       festivals::importFestivalPrecedent();
       historique::logger("Création du festival numéro $festival_id");
 			// Retour à la liste des festivals. Le nouveau festival doit être présent
@@ -127,25 +126,24 @@ class Festivals {
   static function importFestivalPrecedent() {
 		F3::call('outils::verif_admin');
       // Importation historique_organismes
-      // Vérification du nombre de festivals 
-    DB::sql('SELECT count(*) as nb_festivals FROM festivals');
-    $nbFestivalsExistants = F3::get('DB')->result[0]['nb_festivals'];
-    if($nbFestivalsExistants > 2){
-    	DB::sql('SELECT id FROM festivals ORDER BY id DESC LIMIT 2');
-    	$result = F3::get('DB')->result;
-	$nouveau_festival = $result[0]['id'];
-	$ancien_festival = $result[1]['id'];
-	DB::sql("SELECT responsable, organisme_id, individu_id FROM historique_organismes WHERE festival_id = $ancien_festival ORDER BY id");
-	foreach (F3::get('DB')->result as $row) {
-   			$historique_organismes=new Axon('historique_organismes');
-	   		$historique_organismes->responsable = $row['responsable'];
-	   		$historique_organismes->organisme_id =  $row['organisme_id'];
-	   		$historique_organismes->individu_id = $row['individu_id'];
-	   		$historique_organismes->festival_id = $nouveau_festival;
-	   		$historique_organismes->present = 0;
-			$historique_organismes->save();
-	   	}
-	}
+    DB::sql('SELECT id FROM festivals ORDER BY id DESC LIMIT 2');
+    $result = F3::get('DB')->result;
+		$nouveau_fesival = $result[0]['id'];
+		$ancien_fesival = $result[1]['id'];
+
+    DB::sql("SELECT responsable, organisme_id, individu_id FROM historique_organismes WHERE festival_id = $ancien_fesival ORDER BY id");
+	  foreach (F3::get('DB')->result as $row) {
+   	
+	   	$historique_organismes=new Axon('historique_organismes');
+	   	$historique_organismes->responsable = $row['responsable'];
+	   	$historique_organismes->organisme_id =  $row['organisme_id'];
+	   	$historique_organismes->individu_id = $row['individu_id'];
+	   	$historique_organismes->festival_id = $nouveau_fesival;
+	   	$historique_organismes->present = 0;
+		$historique_organismes->save();
+	   	
+		}
+
   }
 
 

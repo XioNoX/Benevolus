@@ -32,7 +32,7 @@ class Outils {
 	}
 
 	/**
-	 * Définit et stocke le menu dans une variable FatFree
+	 * Défini et stock le menu dans une variable FatFree
 	 */
 	static function menu() {
 		$individu_id = F3::get('SESSION.id');
@@ -157,7 +157,6 @@ class Outils {
 					$festival = new Axon('festivals');  //Utilisation la table des festivals
 					$festival->load(array('id=:id',array(':id'=>$_SESSION['festival_id'])));  //Chargement du festival courant
 		//F3::set('festivals_jours',$festivals_jours->afind(array('festival_id=:id',array(':id'=>$_SESSION['festival_id'])),'jour'));
-					
 					F3::set('festival_annee', $festival->annee);
 
 					F3::set('menu',
@@ -174,7 +173,7 @@ class Outils {
 	}
 
 	/**
-	 * Fonction appelée quand un accès non autorisé à une page est effectué
+	 * Fonction appelée quand un accès non autorisée à une page est effectué
 	 */
 	static function http401() {
 		$requete = parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH); //Récupération de l'adresse de la page	
@@ -324,19 +323,7 @@ class Outils {
 	 */	
 	static function dernier_festival() {  //TODO utiliser les dates de festival_jours
 		DB::sql('SELECT id FROM festivals ORDER BY id DESC LIMIT 1'); //Recherche du festival le plus récent (id le plus élevé)
-		$countResult = F3::get('DB')->result;
-		//$countResult = 0;
-		if(count($countResult) < 1) {
-			F3::set('SESSION.festival_id','');
-			if (outils::est_admin()) F3::reroute('/festivals/ajouter');
-			else{ 
-				F3::set('message','Aucun festival ou évènement existant - Veuillez contacter l\'administrateur ou le responsable de l\'évènement.');
-				F3::call('connexion::sortie'); 
-			 }				
-		} else {
-			F3::set('SESSION.festival_id', F3::get('DB')->result[0]['id']); //définition de la variable de session
-			}
-			
+		F3::set('SESSION.festival_id', F3::get('DB')->result[0]['id']); //définition de la variable de session
 	}
 
 	/**
@@ -396,7 +383,7 @@ class Outils {
 		return mail($emailInvite, $sujet, $corps, $headers);
 	}
 
-	// Pour une plus grande légèreté du site, les bibliothéques javascript ainsi que les fichiers CSS respectifs sont inclus uniquement si besoin.
+	// Pour une plus grande légèretée du site, les bibliothéques javascript ainsi que les fichiers CSS respectifs sont inclus uniquement si besoin.
 	
 	/**
 	 * Activer le jquery (lier le javascript à la page)
