@@ -125,25 +125,29 @@ class Festivals {
 
   static function importFestivalPrecedent() {
 		F3::call('outils::verif_admin');
-      // Importation historique_organismes
-    DB::sql('SELECT id FROM festivals ORDER BY id DESC LIMIT 2');
-    $result = F3::get('DB')->result;
-		$nouveau_fesival = $result[0]['id'];
-		$ancien_fesival = $result[1]['id'];
+	//Recupération du nombre de festivals
+	DB::sql('SELECT count(*) FROM festivals');
+      	$nbFestivalPrecedent = F3::get('DB')->result;
+	if(count($nbFestivalPrecedent) > 2){
+		// Importation historique_organismes
+    		DB::sql('SELECT id FROM festivals ORDER BY id DESC LIMIT 2');
+   		$result = F3::get('DB')->result;
+		$nouveau_festival = $result[0]['id'];
+		$ancien_festival = $result[1]['id'];
 
-    DB::sql("SELECT responsable, organisme_id, individu_id FROM historique_organismes WHERE festival_id = $ancien_fesival ORDER BY id");
-	  foreach (F3::get('DB')->result as $row) {
+    		DB::sql("SELECT responsable, organisme_id, individu_id FROM historique_organismes WHERE festival_id = $ancien_festival ORDER BY id");
+	  		foreach (F3::get('DB')->result as $row) {
    	
-	   	$historique_organismes=new Axon('historique_organismes');
-	   	$historique_organismes->responsable = $row['responsable'];
-	   	$historique_organismes->organisme_id =  $row['organisme_id'];
-	   	$historique_organismes->individu_id = $row['individu_id'];
-	   	$historique_organismes->festival_id = $nouveau_fesival;
-	   	$historique_organismes->present = 0;
-		$historique_organismes->save();
+			   	$historique_organismes=new Axon('historique_organismes');
+	   			$historique_organismes->responsable = $row['responsable'];
+	   			$historique_organismes->organisme_id =  $row['organisme_id'];
+	   			$historique_organismes->individu_id = $row['individu_id'];
+	   			$historique_organismes->festival_id = $nouveau_festival;
+	   			$historique_organismes->present = 0;
+				$historique_organismes->save();
 	   	
-		}
-
+			}
+	}
   }
 
 
