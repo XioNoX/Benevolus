@@ -584,7 +584,7 @@ class Profils {
 
 		//Récupération de tous les participants au festival xxxx et OK
 		//TODO EN DUR
-		$individus = DB::sql("SELECT individus.id AS individu_id, organismes.id AS organisme_id FROM `organismes`, `historique_organismes`, `individus`, `villes` WHERE historique_organismes.individu_id = individus.id AND historique_organismes.festival_id = $festival_id AND historique_organismes.organisme_id = organismes.id AND individus.statut_id=1 AND individus.ville_id=villes.id ORDER BY villes.cp;");
+		$individus = DB::sql("SELECT individus.id AS individu_id, organismes.id AS organisme_id FROM `organismes`, `historique_organismes`, `individus`, `villes` WHERE historique_organismes.individu_id = individus.id AND historique_organismes.festival_id = $festival_id AND historique_organismes.organisme_id = organismes.id AND (organismes.organisme_type_id=1 OR organismes.organisme_type_id=2) AND individus.statut_id=1 AND individus.ville_id=villes.id ORDER BY villes.cp;");
 
 		foreach($individus as $cle=>$valeur)
 		{
